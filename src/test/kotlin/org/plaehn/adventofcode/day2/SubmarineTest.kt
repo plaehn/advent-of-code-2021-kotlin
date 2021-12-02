@@ -28,6 +28,28 @@ internal class SubmarineTest {
 
         assertThat(position.horizontalPosition * position.depth).isEqualTo(2027977)
     }
+
+    @Test
+    fun `Compute course using aim on test input`() {
+        val lines = this::class.java.readLines("test_input.txt")
+
+        val submarine = Submarine.fromLines(lines)
+
+        val position = submarine.computeCourse(useAim = true)
+
+        assertThat(position.horizontalPosition * position.depth).isEqualTo(900)
+    }
+
+    @Test
+    fun `Compute course using aim on puzzle input`() {
+        val lines = this::class.java.readLines("puzzle_input.txt")
+
+        val submarine = Submarine.fromLines(lines)
+
+        val position = submarine.computeCourse(useAim = true)
+
+        assertThat(position.horizontalPosition * position.depth).isEqualTo(1903644897)
+    }
 }
 
 
