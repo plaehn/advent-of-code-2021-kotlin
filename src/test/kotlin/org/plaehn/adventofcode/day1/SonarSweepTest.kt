@@ -3,6 +3,7 @@ package org.plaehn.adventofcode.day1
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import org.junit.jupiter.api.Test
+import org.plaehn.adventofcode.common.readLines
 
 internal class SonarSweepTest {
 
@@ -44,15 +45,12 @@ internal class SonarSweepTest {
             measurements,
             slidingWindowSize = 3
         )
-        
+
         assertThat(numberOfIncreasingMeasurements).isEqualTo(1471)
     }
 
-    private fun readInput(ressourceName: String): List<Int> =
+    private fun readInput(resource: String): List<Int> =
         this::class.java
-            .getResource(ressourceName)!!
-            .readText()
-            .lines()
-            .filter { it.isNotBlank() }
+            .readLines(resource)
             .map { Integer.valueOf(it) }
 }
