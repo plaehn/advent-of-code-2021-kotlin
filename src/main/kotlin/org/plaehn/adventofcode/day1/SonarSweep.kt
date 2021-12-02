@@ -2,15 +2,15 @@ package org.plaehn.adventofcode.day1
 
 object SonarSweep {
 
-    fun countIncreasingMeasurementsOfSlidingWindows(values: List<Int>) =
-        countIncreasingMeasurements(values = sumSlidingWindows(values))
+    fun countIncreasingMeasurements(values: List<Int>, slidingWindowSize: Int = 1) =
+        countIncreasing(values = sumSlidingWindows(slidingWindowSize, values))
 
-    private fun sumSlidingWindows(values: List<Int>) =
+    private fun sumSlidingWindows(size: Int, values: List<Int>) =
         values
-            .windowed(size = 3)
+            .windowed(size)
             .map { it.sum() }
 
-    fun countIncreasingMeasurements(values: List<Int>) =
+    private fun countIncreasing(values: List<Int>) =
         values
             .fold(Accumulator()) { accumulator: Accumulator, nextValue: Int ->
                 accumulator.accumulate(nextValue)

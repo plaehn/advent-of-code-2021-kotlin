@@ -28,7 +28,10 @@ internal class SonarSweepTest {
     fun `Count measurements larger than previous using windows of size 3 on test input`() {
         val measurements = readInput("test_input.txt")
 
-        val numberOfIncreasingMeasurements = SonarSweep.countIncreasingMeasurementsOfSlidingWindows(measurements)
+        val numberOfIncreasingMeasurements = SonarSweep.countIncreasingMeasurements(
+            measurements,
+            slidingWindowSize = 3
+        )
 
         assertThat(numberOfIncreasingMeasurements).isEqualTo(5)
     }
@@ -37,8 +40,11 @@ internal class SonarSweepTest {
     fun `Count measurements larger than previous using windows of size 3 on puzzle input`() {
         val measurements = readInput("puzzle_input.txt")
 
-        val numberOfIncreasingMeasurements = SonarSweep.countIncreasingMeasurementsOfSlidingWindows(measurements)
-
+        val numberOfIncreasingMeasurements = SonarSweep.countIncreasingMeasurements(
+            measurements,
+            slidingWindowSize = 3
+        )
+        
         assertThat(numberOfIncreasingMeasurements).isEqualTo(1471)
     }
 
