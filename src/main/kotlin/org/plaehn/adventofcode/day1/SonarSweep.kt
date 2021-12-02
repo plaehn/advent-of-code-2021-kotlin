@@ -1,15 +1,24 @@
 package org.plaehn.adventofcode.day1
 
-class SonarSweep(val measurements: List<Int>) {
+class SonarSweep(private val measurements: List<Int>) {
 
-    fun countIncreasingMeasurements(): Int {
-        val acc = measurements.fold(Pair(0, -1)) { acc: Pair<Int, Int>, measurement: Int ->
-            if (acc.second > 0 && measurement > acc.second) {
-                Pair(acc.first + 1, measurement)
-            } else {
-                Pair(acc.first, measurement)
-            }
-        }
-        return acc.first
+    fun countIncreasingMeasurements() =
+        measurements
+            .fold(Accumulator()) { accumulator: Accumulator, measurement: Int ->
+                accumulator.accumulateNext(measurement)
+            }.count
+
+    private data class Accumulator(val count: Int = 0, val previous: Int = -1) {
+
+        fun accumulateNext(measurement: Int) =
+            Accumulator(computeNewCount(measurement), measurement)
+
+        private fun computeNewCount(measurement: Int) =
+            if (hasPrevious() && measurement > previous)
+                count + 1
+            else
+                count
+
+        private fun hasPrevious() = previous >= 0
     }
 }
