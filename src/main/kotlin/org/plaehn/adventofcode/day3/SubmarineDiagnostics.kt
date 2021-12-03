@@ -10,8 +10,7 @@ class SubmarineDiagnostics(private val binaryNumbers: List<String>) {
         for (index in 0 until binaryNumberLength) {
             gamma = gamma shl 1
             epsilon = epsilon shl 1
-            val bitCount = countBitsAt(index, binaryNumbers)
-            if (bitCount['1']!! > bitCount['0']!!) {
+            if (findMostCommonBitAt(index, binaryNumbers) == '1') {
                 gamma = gamma or 1
             } else {
                 epsilon = epsilon or 1
@@ -20,33 +19,34 @@ class SubmarineDiagnostics(private val binaryNumbers: List<String>) {
         return gamma * epsilon
     }
 
-    private fun countBitsAt(index: Int, numbers: List<String>) =
-        numbers.groupingBy { it[index] }.eachCount()
+    fun computeLifeSupportRating() = computeOxygenGeneratorRating() * computeCo2ScrubberRating()
 
-    fun computeLifeSupportRating() =
-        computeOxygenGeneratorRating() * computeCo2ScrubberRating()
+    private fun computeOxygenGeneratorRating() = reduceNumbers(::findMostCommonBitAt)
 
-    private fun computeOxygenGeneratorRating(): Int {
+    private fun computeCo2ScrubberRating() = reduceNumbers(::findLeastCommonBitAt)
+
+    private fun reduceNumbers(filterFor: (Int, List<String>) -> Char?): Int {
         var numbers = binaryNumbers
         var index = 0
         do {
-            val bitCount = countBitsAt(index, numbers)
-            val filterFor = if (bitCount['1']!! >= bitCount['0']!!) '1' else '0'
-            numbers = numbers.filter { it[index] == filterFor }
+            numbers = numbers.filter { it[index] == filterFor(index, numbers) }
             ++index
         } while (numbers.size > 1)
         return numbers.first().toInt(2)
     }
 
-    private fun computeCo2ScrubberRating(): Int {
-        var numbers = binaryNumbers
-        var index = 0
-        do {
-            val bitCount = countBitsAt(index, numbers)
-            val filterFor = if (bitCount['1']!! < bitCount['0']!!) '1' else '0'
-            numbers = numbers.filter { it[index] == filterFor }
-            ++index
-        } while (numbers.size > 1)
-        return numbers.first().toInt(2)
-    }
+    private fun findMostCommonBitAt(index: Int, numbers: List<String>) =
+        countCharsAt(index, numbers)
+            .toSortedMap(Comparator.reverseOrder())
+            .maxByOrNull { it.value }!!.key
+
+    private fun findLeastCommonBitAt(index: Int, numbers: List<String>) =
+        countCharsAt(index, numbers)
+            .toSortedMap()
+            .minByOrNull { it.value }!!.key
+
+    private fun countCharsAt(index: Int, numbers: List<String>) =
+        numbers
+            .groupingBy { it[index] }
+            .eachCount()
 }
