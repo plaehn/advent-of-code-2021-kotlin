@@ -28,6 +28,28 @@ internal class SubmarineDiagnosticsTest {
 
         assertThat(powerConsumption).isEqualTo(2648450)
     }
+
+    @Test
+    fun `Compute life support rating on test input`() {
+        val lines = this::class.java.readLines("test_input.txt")
+
+        val diagnostics = SubmarineDiagnostics(lines)
+
+        val powerConsumption = diagnostics.computeLifeSupportRating()
+
+        assertThat(powerConsumption).isEqualTo(230)
+    }
+
+    @Test
+    fun `Compute life support rating on puzzle input`() {
+        val lines = this::class.java.readLines("puzzle_input.txt")
+
+        val diagnostics = SubmarineDiagnostics(lines)
+
+        val powerConsumption = diagnostics.computeLifeSupportRating()
+
+        assertThat(powerConsumption).isEqualTo(2845944)
+    }
 }
 
 
