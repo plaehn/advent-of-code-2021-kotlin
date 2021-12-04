@@ -44,7 +44,7 @@ class Bingo(
 
 class Board(rows: List<List<Int>>) {
 
-    private val matrix = Matrix.fromRows(rows)
+    private val matrix = Matrix.fromRows(rows, -1)
 
     fun mark(number: Int) {
         matrix.replaceAll { value ->
@@ -58,7 +58,7 @@ class Board(rows: List<List<Int>>) {
 
     fun isWinning() = matrix.rows().any(::allMarked) || matrix.columns().any(::allMarked)
 
-    private fun allMarked(values: Array<Int>) = values.all { it.isMarked() }
+    private fun allMarked(values: List<Int>) = values.all { it.isMarked() }
 
     fun findAllUnmarkedNumbers() = matrix.values().filter { !it.isMarked() }
 

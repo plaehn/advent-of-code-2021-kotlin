@@ -1,10 +1,13 @@
 package org.plaehn.adventofcode.common
 
-data class Matrix(private val matrix: Array<Array<Int>>) {
+data class Matrix<T>(
+    private val matrix: List<MutableList<T>>,
+    private val defaultValue: T
+) {
 
-    operator fun get(rowNumber: Int): Array<Int> = matrix[rowNumber]
+    operator fun get(rowNumber: Int): List<T> = matrix[rowNumber]
 
-    fun replaceAll(transform: (Int) -> Int) {
+    fun replaceAll(transform: (T) -> T) {
         matrix.forEach { row ->
             row.forEachIndexed { index, value ->
                 row[index] = transform(value)
@@ -12,37 +15,22 @@ data class Matrix(private val matrix: Array<Array<Int>>) {
         }
     }
 
-    fun values() = matrix.flatMap { it.asList() }
+    fun values() = matrix.flatten()
 
     fun rows() = matrix.toList()
 
     fun columns() = transpose().rows()
 
-    private fun transpose(): Matrix {
+    private fun transpose(): Matrix<T> {
         val numberOfRows = matrix.size
         val numberOfCols = matrix.first().size
-        val transpose = Array(numberOfRows) { Array(numberOfCols) { -1 } }
+        val transpose = MutableList(numberOfCols) { MutableList(numberOfRows) { defaultValue } }
         for (i in 0 until numberOfRows) {
             for (j in 0 until numberOfCols) {
                 transpose[j][i] = matrix[i][j]
             }
         }
-        return Matrix(transpose)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Matrix
-
-        if (!matrix.contentDeepEquals(other.matrix)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return matrix.contentDeepHashCode()
+        return Matrix(transpose, defaultValue)
     }
 
     override fun toString() =
@@ -53,9 +41,9 @@ data class Matrix(private val matrix: Array<Array<Int>>) {
         }
 
     companion object {
-        fun fromRows(rows: List<List<Int>>) =
+        fun <T> fromRows(rows: List<List<T>>, defaultValue: T) =
             Matrix(rows.map {
-                it.toTypedArray()
-            }.toTypedArray())
+                it.toMutableList()
+            }, defaultValue)
     }
 }
