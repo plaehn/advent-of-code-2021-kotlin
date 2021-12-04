@@ -8,23 +8,29 @@ class Bingo(
     private val boards: List<Board>
 ) {
 
-    fun computeScoreOfWinningBoard(): Int {
-        val (winningBoard, lastNumber) = findWinningBoardAndLastNumber()
+    fun computeScoreOfFirstWinningBoard(): Int {
+        val (winningBoard, lastNumber) = findWinningBoardsAndLastNumber().first()
         return lastNumber * winningBoard.findAllUnmarkedNumbers().sum()
     }
 
-    private fun findWinningBoardAndLastNumber(): Pair<Board, Int> {
-        numbers.forEach { number ->
-            boards.forEach { board ->
-                board.mark(number)
-                if (board.isWinning()) {
-                    return Pair(board, number)
-                }
-            }
-        }
-        throw IllegalStateException("No winning board found")
+    fun computeScoreOfLastWinningBoard(): Int {
+        val (winningBoard, lastNumber) = findWinningBoardsAndLastNumber().last()
+        return lastNumber * winningBoard.findAllUnmarkedNumbers().sum()
     }
 
+    private fun findWinningBoardsAndLastNumber(): Sequence<Pair<Board, Int>> =
+        sequence {
+            numbers.forEach { number ->
+                boards
+                    .filter { !it.isWinning() }
+                    .forEach { board ->
+                        board.mark(number)
+                        if (board.isWinning()) {
+                            yield(Pair(board, number))
+                        }
+                    }
+            }
+        }
 
     companion object {
         fun fromLines(input: String): Bingo {
