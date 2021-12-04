@@ -48,7 +48,7 @@ internal class BingoTest {
 
         val scoreOfWinningBoard = bingo.computeScoreOfLastWinningBoard()
 
-        assertThat(scoreOfWinningBoard).isEqualTo(71708)
+        assertThat(scoreOfWinningBoard).isEqualTo(34726)
     }
 }
 

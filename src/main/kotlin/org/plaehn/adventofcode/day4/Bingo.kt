@@ -42,13 +42,13 @@ class Bingo(
     }
 }
 
-class Board(rows: List<List<Int>>) {
+class Board(rows: List<List<BingoNumber>>) {
 
-    private val matrix = Matrix.fromRows(rows, -1)
+    private val matrix = Matrix.fromRows(rows, BingoNumber(-1))
 
     fun mark(number: Int) {
         matrix.replaceAll { value ->
-            if (value == number && !value.isMarked()) {
+            if (value.isMatch(number)) {
                 value.mark()
             } else {
                 value
@@ -58,13 +58,9 @@ class Board(rows: List<List<Int>>) {
 
     fun isWinning() = matrix.rows().any(::allMarked) || matrix.columns().any(::allMarked)
 
-    private fun allMarked(values: List<Int>) = values.all { it.isMarked() }
+    private fun allMarked(values: List<BingoNumber>) = values.all { it.isMarked }
 
-    fun findAllUnmarkedNumbers() = matrix.values().filter { !it.isMarked() }
-
-    private fun Int.isMarked() = this < 0
-
-    private fun Int.mark() = -1 * this
+    fun findAllUnmarkedNumbers() = matrix.values().filter { !it.isMarked }.map { it.number }
 
     companion object {
         fun fromInput(input: String) =
@@ -74,7 +70,14 @@ class Board(rows: List<List<Int>>) {
             line.split(' ')
                 .filter { it.isNotBlank() }
                 .map {
-                    it.trim().toInt()
+                    BingoNumber(it.trim().toInt())
                 }
     }
+}
+
+data class BingoNumber(val number: Int, val isMarked: Boolean = false) {
+
+    fun mark(): BingoNumber = BingoNumber(number, true)
+
+    fun isMatch(number: Int) = this.number == number && !isMarked
 }

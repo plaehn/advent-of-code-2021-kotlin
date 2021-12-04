@@ -17,7 +17,7 @@ data class Matrix<T>(
 
     fun values() = matrix.flatten()
 
-    fun rows() = matrix.toList()
+    fun rows(): List<MutableList<T>> = matrix.toList()
 
     fun columns() = transpose().rows()
 
