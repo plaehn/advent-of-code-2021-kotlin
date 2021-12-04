@@ -58,7 +58,7 @@ class Board(rows: List<List<Int>>) {
 
     fun isWinning() = matrix.rows().any(::allMarked) || matrix.columns().any(::allMarked)
 
-    private fun allMarked(values: IntArray) = values.all { it.isMarked() }
+    private fun allMarked(values: Array<Int>) = values.all { it.isMarked() }
 
     fun findAllUnmarkedNumbers() = matrix.values().filter { !it.isMarked() }
 

@@ -1,8 +1,8 @@
 package org.plaehn.adventofcode.common
 
-data class Matrix(private val matrix: Array<IntArray>) {
+data class Matrix(private val matrix: Array<Array<Int>>) {
 
-    operator fun get(rowNumber: Int): IntArray = matrix[rowNumber]
+    operator fun get(rowNumber: Int): Array<Int> = matrix[rowNumber]
 
     fun replaceAll(transform: (Int) -> Int) {
         matrix.forEach { row ->
@@ -21,7 +21,7 @@ data class Matrix(private val matrix: Array<IntArray>) {
     private fun transpose(): Matrix {
         val numberOfRows = matrix.size
         val numberOfCols = matrix.first().size
-        val transpose = Array(numberOfRows) { IntArray(numberOfCols) }
+        val transpose = Array(numberOfRows) { Array(numberOfCols) { -1 } }
         for (i in 0 until numberOfRows) {
             for (j in 0 until numberOfCols) {
                 transpose[j][i] = matrix[i][j]
@@ -55,7 +55,7 @@ data class Matrix(private val matrix: Array<IntArray>) {
     companion object {
         fun fromRows(rows: List<List<Int>>) =
             Matrix(rows.map {
-                it.toIntArray()
+                it.toTypedArray()
             }.toTypedArray())
     }
 }
