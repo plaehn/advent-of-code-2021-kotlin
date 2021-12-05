@@ -5,7 +5,7 @@ data class Matrix<T>(
     private val defaultValue: T
 ) {
 
-    operator fun get(rowNumber: Int): List<T> = matrix[rowNumber]
+    operator fun get(rowNumber: Int): MutableList<T> = matrix[rowNumber]
 
     fun replaceAll(transform: (T) -> T) {
         matrix.forEach { row ->
@@ -41,6 +41,10 @@ data class Matrix<T>(
         }
 
     companion object {
+
+        fun <T> fromDimensions(width: Int, height: Int, defaultValue: T) =
+            Matrix(MutableList(height) { MutableList(width) { defaultValue } }, defaultValue)
+
         fun <T> fromRows(rows: List<List<T>>, defaultValue: T) =
             Matrix(rows.map {
                 it.toMutableList()
