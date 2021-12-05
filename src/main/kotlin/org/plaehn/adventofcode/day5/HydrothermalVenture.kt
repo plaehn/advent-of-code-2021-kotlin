@@ -16,9 +16,9 @@ class HydrothermalVenture(
         matrix = Matrix.fromDimensions(width, height, 0)
     }
 
-    fun computeNumberOfPointsWithAtLeastTwoOverlappingLines(): Int {
+    fun computeNumberOfPointsWithAtLeastTwoOverlappingLines(includeDiagonals: Boolean): Int {
         lines
-            .filter { it.isHorizontal() || it.isVertical() }
+            .filter { includeDiagonals || it.isHorizontal() || it.isVertical() }
             .forEach { line ->
                 drawIn(line)
             }
