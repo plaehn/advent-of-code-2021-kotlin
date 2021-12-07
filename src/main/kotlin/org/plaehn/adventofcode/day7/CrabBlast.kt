@@ -7,9 +7,24 @@ class CrabBlast(
     private val initialPositions: List<Int>
 ) {
 
-    fun findMinimalFuelConsumption() = initialPositions.minOf { costOfAligningTo(it) }
+    private val range = initialPositions.minOrNull()!!..initialPositions.maxOrNull()!!
 
-    private fun costOfAligningTo(pos: Int) = initialPositions.sumOf { (it - pos).absoluteValue }
+    fun findMinimalFuelConsumption(isLinearCostFuncton: Boolean = true) =
+        range.minOf { pos ->
+            costOfAligningTo(
+                pos,
+                if (isLinearCostFuncton) {
+                    { it }
+                } else {
+                    { it * (1 + it) / 2 }
+                }
+            )
+        }
+
+    private fun costOfAligningTo(pos: Int, distance2Cost: (Int) -> Int) =
+        initialPositions
+            .map { (it - pos).absoluteValue }
+            .sumOf(distance2Cost)
 
     companion object {
         fun fromInputString(input: String) = CrabBlast(input.toIntList())

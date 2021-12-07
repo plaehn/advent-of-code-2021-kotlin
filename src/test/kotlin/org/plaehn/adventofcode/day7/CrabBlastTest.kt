@@ -26,6 +26,26 @@ internal class CrabBlastTest {
 
         assertThat(minimalFuelConsumption).isEqualTo(349769)
     }
+
+    @Test
+    fun `Compute minimal fuel consumption for second part on test input`() {
+        val input = this::class.java.slurp("test_input.txt")
+
+        val crabBlast = CrabBlast.fromInputString(input)
+        val minimalFuelConsumption = crabBlast.findMinimalFuelConsumption(isLinearCostFuncton = false)
+
+        assertThat(minimalFuelConsumption).isEqualTo(168)
+    }
+
+    @Test
+    fun `Compute minimal fuel consumption for second part on puzzle input`() {
+        val input = this::class.java.slurp("puzzle_input.txt")
+
+        val crabBlast = CrabBlast.fromInputString(input)
+        val minimalFuelConsumption = crabBlast.findMinimalFuelConsumption(isLinearCostFuncton = false)
+
+        assertThat(minimalFuelConsumption).isEqualTo(99540554)
+    }
 }
 
 
