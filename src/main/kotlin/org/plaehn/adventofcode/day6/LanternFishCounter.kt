@@ -1,5 +1,7 @@
 package org.plaehn.adventofcode.day6
 
+import org.plaehn.adventofcode.common.toIntList
+
 class LanternFishCounter(
     initialLanternFishes: List<Int>
 ) {
@@ -29,12 +31,6 @@ class LanternFishCounter(
     }
 
     companion object {
-        fun fromInputString(input: String) =
-            LanternFishCounter(
-                input
-                    .split(",")
-                    .map { it.trim() }
-                    .map { it.toInt() }
-            )
+        fun fromInputString(input: String) = LanternFishCounter(input.toIntList())
     }
 }
