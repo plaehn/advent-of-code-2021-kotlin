@@ -7,7 +7,7 @@ class CrabBlast(
     private val initialPositions: List<Int>
 ) {
 
-    fun findHorizontalPosition() = initialPositions.minOf { costOfAligningTo(it) }
+    fun findMinimalFuelConsumption() = initialPositions.minOf { costOfAligningTo(it) }
 
     private fun costOfAligningTo(pos: Int) = initialPositions.sumOf { (it - pos).absoluteValue }
 
