@@ -14,7 +14,7 @@ internal class CrabBlastTest {
         val crabBlast = CrabBlast.fromInputString(input)
         val position = crabBlast.findHorizontalPosition()
 
-        assertThat(position).isEqualTo(2)
+        assertThat(position).isEqualTo(37)
     }
 
     @Test
@@ -24,8 +24,7 @@ internal class CrabBlastTest {
         val crabBlast = CrabBlast.fromInputString(input)
         val position = crabBlast.findHorizontalPosition()
 
-        // XXX this is wrong
-        assertThat(position).isEqualTo(331)
+        assertThat(position).isEqualTo(349769)
     }
 }
 
