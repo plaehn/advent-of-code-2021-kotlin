@@ -9,11 +9,11 @@ class CrabBlast(
 
     private val range = initialPositions.minOrNull()!!..initialPositions.maxOrNull()!!
 
-    fun findMinimalFuelConsumption(isLinearCostFuncton: Boolean = true) =
+    fun findMinimalFuelConsumption(isLinearCostFunction: Boolean = true) =
         range.minOf { pos ->
             costOfAligningTo(
                 pos,
-                if (isLinearCostFuncton) {
+                if (isLinearCostFunction) {
                     { it }
                 } else {
                     { it * (1 + it) / 2 }
