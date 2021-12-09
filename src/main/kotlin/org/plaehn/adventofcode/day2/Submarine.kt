@@ -2,6 +2,7 @@ package org.plaehn.adventofcode.day2
 
 import org.plaehn.adventofcode.common.tokenize
 import org.plaehn.adventofcode.day2.Direction.*
+import java.util.*
 
 class Submarine(private val steps: List<Step>) {
 
@@ -43,7 +44,7 @@ data class Step(
     companion object {
         fun fromLine(line: String): Step {
             val (direction, amount) = line.tokenize()
-            return Step(Direction.valueOf(direction.toUpperCase()), amount.toInt())
+            return Step(Direction.valueOf(direction.uppercase(Locale.getDefault())), amount.toInt())
         }
     }
 }
