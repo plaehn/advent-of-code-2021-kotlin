@@ -28,6 +28,28 @@ internal class SmokeBasinTest {
 
         assertThat(sumOfRiskLevels).isEqualTo(532)
     }
+
+    @Test
+    fun `Compute product of size of three largest basins on test input`() {
+        val inputLines = this::class.java.readLines("test_input.txt")
+
+        val smokeBasin = SmokeBasin.fromInputLines(inputLines)
+
+        val product = smokeBasin.computeProductOfSizeOfThreeLargestBasins()
+
+        assertThat(product).isEqualTo(1134)
+    }
+
+    @Test
+    fun `Compute product of size of three largest basins on puzzle input`() {
+        val inputLines = this::class.java.readLines("puzzle_input.txt")
+
+        val smokeBasin = SmokeBasin.fromInputLines(inputLines)
+
+        val product = smokeBasin.computeProductOfSizeOfThreeLargestBasins()
+
+        assertThat(product).isEqualTo(461538) // XXX wrong
+    }
 }
 
 
