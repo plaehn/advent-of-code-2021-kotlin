@@ -20,7 +20,7 @@ class SmokeBasin(
         val basin = mutableSetOf(coord)
         heightmap.neighbors(coord).forEach { neighbor ->
             val neighborHeight = heightmap[neighbor.y][neighbor.x]
-            if (!basin.contains(neighbor) && neighborHeight == 1 + height && neighborHeight != 9) {
+            if (!basin.contains(neighbor) && neighborHeight > height && neighborHeight != 9) {
                 basin += neighbor
                 basin += findBasin(neighbor, neighborHeight)
             }

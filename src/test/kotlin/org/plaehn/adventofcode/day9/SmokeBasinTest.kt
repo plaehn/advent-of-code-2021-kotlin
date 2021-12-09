@@ -48,7 +48,7 @@ internal class SmokeBasinTest {
 
         val product = smokeBasin.computeProductOfSizeOfThreeLargestBasins()
 
-        assertThat(product).isEqualTo(461538) // XXX wrong
+        assertThat(product).isEqualTo(1110780)
     }
 }
 
