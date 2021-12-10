@@ -8,6 +8,48 @@ class SyntaxScorer(
     private val openingCharacters = listOf('(', '[', '{', '<')
     private val closingCharacters = listOf(')', ']', '}', '>')
 
+    fun computeTotalAutocompleteScore() =
+        lines
+            .filter { isIncomplete(it) }
+            .map { computeSequenceOfClosingCharacters(it) }
+            .map { scoreSequenceOfClosingCharacters(it) }
+            .middle()
+
+    private fun isIncomplete(it: String) = findFirstIllegalCharacter(it) == null
+
+    private fun computeSequenceOfClosingCharacters(line: String): String {
+        val stack = Stack<Char>()
+        line.forEach { char ->
+            when (char) {
+                in openingCharacters -> stack.push(char)
+                in closingCharacters -> stack.pop()
+            }
+        }
+        return mapToCorrespondingClosingCharacters(stack)
+    }
+
+    private fun mapToCorrespondingClosingCharacters(stack: Stack<Char>) =
+        stack
+            .reversed()
+            .map { unmatchedOpeningChar -> closingCharacters[openingCharacters.indexOf(unmatchedOpeningChar)] }
+            .joinToString(separator = "")
+
+    private fun scoreSequenceOfClosingCharacters(closingCharacters: String) =
+        closingCharacters.fold(0L) { score, char ->
+            score * 5 + scoreMissingClosingCharacter(char)
+        }
+
+    private fun scoreMissingClosingCharacter(closingCharacter: Char) =
+        when (closingCharacter) {
+            ')' -> 1
+            ']' -> 2
+            '}' -> 3
+            '>' -> 4
+            else -> throw IllegalStateException("Not a closing character: $closingCharacter")
+        }
+
+    private fun List<Long>.middle() = sorted()[size / 2]
+
     fun computeTotalSyntaxErrorScore() =
         lines
             .mapNotNull { findFirstIllegalCharacter(it) }

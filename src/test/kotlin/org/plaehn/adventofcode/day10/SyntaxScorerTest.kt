@@ -28,4 +28,26 @@ internal class SyntaxScorerTest {
 
         assertThat(totalScore).isEqualTo(265527)
     }
+
+    @Test
+    fun `Compute total autocomplete score on test input`() {
+        val inputLines = this::class.java.readLines("test_input.txt")
+
+        val scorer = SyntaxScorer(inputLines)
+
+        val totalScore = scorer.computeTotalAutocompleteScore()
+
+        assertThat(totalScore).isEqualTo(288957L)
+    }
+
+    @Test
+    fun `Compute total autocomplete score on puzzle input`() {
+        val inputLines = this::class.java.readLines("puzzle_input.txt")
+
+        val scorer = SyntaxScorer(inputLines)
+
+        val totalScore = scorer.computeTotalAutocompleteScore()
+
+        assertThat(totalScore).isEqualTo(3969823589L)
+    }
 }
