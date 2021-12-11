@@ -7,6 +7,15 @@ class DumboOctopusGrid(
     private val matrix: Matrix<Int>
 ) {
 
+    fun computeNumberOfStepsUntilAllFlash(): Int {
+        var steps = 0
+        do {
+            val flashes = flashesInStep()
+            steps++
+        } while (flashes < 100)
+        return steps
+    }
+
     fun computeNumberOfFlashes() =
         (1..100).fold(0) { flashCount, _ -> flashCount + flashesInStep() }
 
