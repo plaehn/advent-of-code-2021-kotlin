@@ -10,8 +10,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <kotlin.version>1.5.30</kotlin.version>
-        <kotlin.language.version>1.4</kotlin.language.version>
+        <kotlin.version>1.5.10</kotlin.version>
+        <kotlin.language.version>1.5</kotlin.language.version>
         <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
         <junit.version>5.4.2</junit.version>
     </properties>

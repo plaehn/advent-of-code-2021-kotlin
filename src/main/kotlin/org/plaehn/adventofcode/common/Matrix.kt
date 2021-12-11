@@ -7,6 +7,10 @@ data class Matrix<T>(
 
     operator fun get(rowNumber: Int): MutableList<T> = matrix[rowNumber]
 
+    fun width() = matrix.first().size
+
+    fun height() = matrix.size
+
     fun replaceAll(transform: (T) -> T) {
         matrix.forEach { row ->
             row.forEachIndexed { index, value ->
@@ -21,12 +25,28 @@ data class Matrix<T>(
 
     fun columns() = transpose().rows()
 
+    fun toMap(): Map<Coord, T> =
+        sequence {
+            for (y in 0 until height()) {
+                for (x in 0 until width()) {
+                    yield(Coord(x, y) to matrix[y][x])
+                }
+            }
+        }.toMap()
+
+    fun neighbors(coord: Coord) =
+        neighborOffsets()
+            .map { coord + it }
+            .filter { isInsideBounds(it) }
+
+    private fun neighborOffsets() = listOf(Coord(-1, 0), Coord(0, 1), Coord(1, 0), Coord(0, -1))
+
+    private fun isInsideBounds(coord: Coord) = coord.y in 0 until height() && coord.x in 0 until width()
+
     private fun transpose(): Matrix<T> {
-        val numberOfRows = matrix.size
-        val numberOfCols = matrix.first().size
-        val transpose = MutableList(numberOfCols) { MutableList(numberOfRows) { defaultValue } }
-        for (i in 0 until numberOfRows) {
-            for (j in 0 until numberOfCols) {
+        val transpose = MutableList(width()) { MutableList(height()) { defaultValue } }
+        for (i in 0 until height()) {
+            for (j in 0 until width()) {
                 transpose[j][i] = matrix[i][j]
             }
         }
@@ -51,3 +71,11 @@ data class Matrix<T>(
             }, defaultValue)
     }
 }
+
+data class Coord(val x: Int, val y: Int) {
+    operator fun plus(summand: Coord) = Coord(x + summand.x, y + summand.y)
+
+    companion object {}
+}
+
+

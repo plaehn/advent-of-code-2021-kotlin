@@ -1,5 +1,6 @@
 package org.plaehn.adventofcode.day5
 
+import org.plaehn.adventofcode.common.Coord
 import org.plaehn.adventofcode.common.Matrix
 import kotlin.math.sign
 
@@ -45,18 +46,6 @@ class HydrothermalVenture(
     }
 }
 
-data class Coord(val x: Int, val y: Int) {
-
-    operator fun plus(summand: Coord) = Coord(x + summand.x, y + summand.y)
-
-    companion object {
-        fun fromString(input: String): Coord {
-            val (x, y) = input.split(",")
-            return Coord(x.toInt(), y.toInt())
-        }
-    }
-}
-
 data class Line(val start: Coord, val end: Coord) {
 
     fun isHorizontal() = start.y == end.y
@@ -67,6 +56,11 @@ data class Line(val start: Coord, val end: Coord) {
         fun fromString(input: String): Line {
             val (start, end) = input.split(" -> ")
             return Line(Coord.fromString(start), Coord.fromString(end))
+        }
+
+        private fun Coord.Companion.fromString(input: String): Coord {
+            val (x, y) = input.split(",")
+            return Coord(x.toInt(), y.toInt())
         }
     }
 }
