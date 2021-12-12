@@ -8,17 +8,23 @@ class PassagePathing(
     private val graph: Graph<String>
 ) {
 
-    fun countPaths() = countPaths("start", setOf())
+    fun countPaths(canVisitSingleSmallCaveTwice: Boolean = false) =
+        countPaths("start", setOf(), if (canVisitSingleSmallCaveTwice) null else "")
 
-    private fun countPaths(node: String, seenSmallCaves: Set<String>): Int =
+    private fun countPaths(node: String, seenSmallCaves: Set<String>, smallCaveVisitedTwice: String?): Int =
         graph
             .adjacentNodes(node)
-            .sumOf { cave ->
+            .sumOf { adjacentCave ->
                 when {
-                    cave == "start" -> 0
-                    cave == "end" -> 1
-                    cave.isLarge() -> countPaths(cave, seenSmallCaves)
-                    !seenSmallCaves.contains(cave) -> countPaths(cave, seenSmallCaves + cave)
+                    adjacentCave == "start" -> 0
+                    adjacentCave == "end" -> 1
+                    adjacentCave.isLarge() -> countPaths(adjacentCave, seenSmallCaves, smallCaveVisitedTwice)
+                    seenSmallCaves.contains(adjacentCave) && smallCaveVisitedTwice == null -> {
+                        countPaths(adjacentCave, seenSmallCaves, adjacentCave)
+                    }
+                    !seenSmallCaves.contains(adjacentCave) -> {
+                        countPaths(adjacentCave, seenSmallCaves + adjacentCave, smallCaveVisitedTwice)
+                    }
                     else -> 0
                 }
             }
