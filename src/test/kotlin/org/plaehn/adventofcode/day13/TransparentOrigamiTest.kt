@@ -44,8 +44,6 @@ internal class TransparentOrigamiTest {
             X...X
             X...X
             XXXXX
-            .....
-            .....
             """.trimIndent()
         )
     }
@@ -57,7 +55,7 @@ internal class TransparentOrigamiTest {
         val transparentOrigami = TransparentOrigami.fromInput(input)
 
         val code = transparentOrigami.computeCode()
-        println(code)
+
         // HECRZKPR
         assertThat(code).isEqualTo(
             """
