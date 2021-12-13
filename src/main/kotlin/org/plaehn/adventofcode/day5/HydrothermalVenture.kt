@@ -1,6 +1,7 @@
 package org.plaehn.adventofcode.day5
 
 import org.plaehn.adventofcode.common.Coord
+import org.plaehn.adventofcode.common.Coord.Companion.fromString
 import org.plaehn.adventofcode.common.Matrix
 import kotlin.math.sign
 
@@ -56,11 +57,6 @@ data class Line(val start: Coord, val end: Coord) {
         fun fromString(input: String): Line {
             val (start, end) = input.split(" -> ")
             return Line(Coord.fromString(start), Coord.fromString(end))
-        }
-
-        private fun Coord.Companion.fromString(input: String): Coord {
-            val (x, y) = input.split(",")
-            return Coord(x.toInt(), y.toInt())
         }
     }
 }

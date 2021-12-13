@@ -49,7 +49,7 @@ data class Matrix<T>(
 
     private fun isInsideBounds(coord: Coord) = coord.y in 0 until height() && coord.x in 0 until width()
 
-    private fun transpose(): Matrix<T> {
+    fun transpose(): Matrix<T> {
         val transpose = MutableList(width()) { MutableList(height()) { defaultValue } }
         for (i in 0 until height()) {
             for (j in 0 until width()) {
@@ -59,12 +59,17 @@ data class Matrix<T>(
         return Matrix(transpose, defaultValue)
     }
 
-    override fun toString() =
-        matrix.joinToString(separator = "\n") { row ->
+    fun restrictToRows(fromIndex: Int, toIndex: Int) =
+        Matrix(matrix.subList(fromIndex, toIndex), defaultValue)
+
+    override fun toString(): String {
+        val maxLength = 2 + values().maxOf { it.toString().length }
+        return matrix.joinToString(separator = "\n") { row ->
             row.joinToString(separator = "") {
-                it.toString().padStart(4)
+                it.toString().padStart(maxLength)
             }
         }
+    }
 
     companion object {
 
@@ -83,7 +88,12 @@ data class Coord(val x: Int, val y: Int) {
 
     fun isCenter() = x == 0 && y == 0
 
-    companion object
+    companion object {
+        fun Companion.fromString(input: String): Coord {
+            val (x, y) = input.split(",")
+            return Coord(x.toInt(), y.toInt())
+        }
+    }
 }
 
 
