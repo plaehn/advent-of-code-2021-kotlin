@@ -4,52 +4,51 @@ import org.plaehn.adventofcode.common.Coord
 import org.plaehn.adventofcode.common.Coord.Companion.fromString
 import org.plaehn.adventofcode.common.groupByBlankLines
 
-class TransparentOrigami(private val dots: Set<Coord>, private val foldInstructions: List<FoldInstruction>) {
+class TransparentOrigami(private val dots: Set<Coord>, private val folds: List<Fold>) {
 
-    fun computeCode() =
-        foldInstructions.fold(dots) { dots, foldInstruction ->
-            fold(dots, foldInstruction)
-        }.toCode()
+    fun computeCode() = folds.fold(dots, ::foldPaper).toCode()
 
-
-    private fun Set<Coord>.toCode(): String {
-        val width = 1 + maxOf { it.x }
-        val height = 1 + maxOf { it.y }
-        return (0 until height).joinToString("\n") { y ->
-            (0 until width).map { x ->
+    private fun Set<Coord>.toCode() =
+        (0 until height()).joinToString("\n") { y ->
+            (0 until width()).map { x ->
                 if (contains(Coord(x, y))) 'X' else '.'
             }.joinToString("")
         }
-    }
 
-    fun computeNumberOfDotsAfterFirstFold() = fold(dots, foldInstructions.first()).size
+    private fun Set<Coord>.height() = 1 + maxOf { it.y }
 
-    private fun fold(dots: Set<Coord>, foldInstruction: FoldInstruction) =
+    private fun Set<Coord>.width() = 1 + maxOf { it.x }
+
+    fun computeNumberOfDotsAfterFirstFold() = foldPaper(dots, folds.first()).size
+
+    private fun foldPaper(dots: Set<Coord>, fold: Fold) =
         dots.map { dot ->
-            if (foldInstruction.dimension == 'y') {
-                Coord(dot.x, if (dot.y > foldInstruction.value) 2 * foldInstruction.value - dot.y else dot.y)
+            if (fold.axis == 'y') {
+                dot.copy(y = fold.mapIndex(dot.y))
             } else {
-                Coord(if (dot.x > foldInstruction.value) 2 * foldInstruction.value - dot.x else dot.x, dot.y)
+                dot.copy(x = fold.mapIndex(dot.x))
             }
         }.toSet()
+
+    private fun Fold.mapIndex(index: Int) =
+        if (index <= line) index else 2 * line - index
 
 
     companion object {
         fun fromInput(input: String): TransparentOrigami {
             val (dotsStr, foldInstructionsStr) = input.groupByBlankLines()
             val dots = dotsStr.lines().map { Coord.fromString(it) }.toSet()
-            val foldInstructions = foldInstructionsStr.lines().map { FoldInstruction.fromString(it) }
-            return TransparentOrigami(dots, foldInstructions)
+            val folds = foldInstructionsStr.lines().map { Fold.fromString(it) }
+            return TransparentOrigami(dots, folds)
         }
     }
 }
 
-
-data class FoldInstruction(val dimension: Char, val value: Int) {
+data class Fold(val axis: Char, val line: Int) {
     companion object {
-        fun fromString(input: String): FoldInstruction {
+        fun fromString(input: String): Fold {
             val (dimension, value) = input.split(' ').last().split('=')
-            return FoldInstruction(dimension.first(), value.toInt())
+            return Fold(dimension.first(), value.toInt())
         }
     }
 }

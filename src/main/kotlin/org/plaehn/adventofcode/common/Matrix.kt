@@ -9,9 +9,9 @@ data class Matrix<T>(
 
     operator fun get(rowNumber: Int): MutableList<T> = matrix[rowNumber]
 
-    fun width() = matrix.first().size
+    private fun width() = matrix.first().size
 
-    fun height() = matrix.size
+    private fun height() = matrix.size
 
     fun replaceAll(transform: (T) -> T) {
         matrix.forEach { row ->
@@ -49,14 +49,6 @@ data class Matrix<T>(
 
     private fun isInsideBounds(coord: Coord) = coord.y in 0 until height() && coord.x in 0 until width()
 
-    fun rotateLeft() = transpose().reflectHorizontally()
-
-    fun rotateRight() = transpose().reflectVertically()
-
-    fun reflectHorizontally() = Matrix(rows().reversed(), defaultValue)
-
-    fun reflectVertically() = transpose().reflectHorizontally().transpose()
-
     private fun transpose(): Matrix<T> {
         val transposed = MutableList(width()) { MutableList(height()) { defaultValue } }
         for (i in 0 until height()) {
@@ -66,9 +58,6 @@ data class Matrix<T>(
         }
         return Matrix(transposed, defaultValue)
     }
-
-    fun restrictToRows(fromIndex: Int, toIndex: Int) =
-        Matrix(matrix.subList(fromIndex, toIndex), defaultValue)
 
     override fun toString(): String {
         val maxLength = 2 + values().maxOf { it.toString().length }
