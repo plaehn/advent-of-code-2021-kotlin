@@ -4,6 +4,7 @@ import org.plaehn.adventofcode.common.Coord
 import org.plaehn.adventofcode.common.Coord.Companion.fromString
 import org.plaehn.adventofcode.common.Matrix
 import org.plaehn.adventofcode.common.groupByBlankLines
+import java.lang.Math.ceil
 
 class TransparentOrigami(dots: List<Coord>, private val foldInstructions: List<FoldInstruction>) {
 
@@ -18,33 +19,47 @@ class TransparentOrigami(dots: List<Coord>, private val foldInstructions: List<F
         }
     }
 
-    fun computeNumberOfDotsAfterFirstFold(): Int {
-        val firstFold = foldInstructions.first()
-        paper = if (firstFold.dimension == 'y') {
+    fun computeCode(): String {
+        foldInstructions.forEach {
+            println("${paper.width()} x ${paper.height()}; fold: $it")
+            paper = fold(it)
+        }
+        return codeString(paper)
+    }
+
+    private fun codeString(matrix: Matrix<Boolean>) =
+        matrix.rows().joinToString("\n") { row -> row.map { if (it) 'X' else '.' }.joinToString("") }
+
+    fun computeNumberOfDotsAfterFirstFold() =
+        fold(foldInstructions.first()).values().count { it }
+
+    private fun fold(firstFold: FoldInstruction): Matrix<Boolean> =
+        if (firstFold.dimension == 'y') {
             paper.foldUp(firstFold.value)
         } else {
             paper.foldLeft(firstFold.value)
         }
-        return paper.values().count { it }
-    }
 
     private fun Matrix<Boolean>.foldUp(value: Int): Matrix<Boolean> {
         check(height() / 2 == value) { "Fold is not in the middle; height is ${height()}, fold is $value" }
+        check(this[value].all { !it }) { "Row $value is not empty" }
         (0 until value).forEach { y ->
             val topRow = this[y]
-            val bottomIdx = height() - y - 1
+            val bottomIdx = height() - y - 1 // XXX
             val bottomRow = this[bottomIdx]
             topRow.zip(bottomRow).forEachIndexed { x, (topElement, bottomElement) ->
                 val newElement = topElement || bottomElement
                 this[y][x] = newElement
             }
         }
+        val newHeight = ceil((height() / 2.0)).toInt()
+        println("Old height: ${height()};   new height: $newHeight")
         return this.restrictToRows(0, value)
     }
 
     private fun Matrix<Boolean>.foldLeft(value: Int): Matrix<Boolean> {
         check(width() / 2 == value) { "Fold is not in the middle; width is ${width()}, fold is $value" }
-        return transpose().foldUp(value).transpose()
+        return rotateLeft().foldUp(value).rotateRight()
     }
 
     companion object {

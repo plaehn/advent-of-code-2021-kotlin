@@ -49,14 +49,22 @@ data class Matrix<T>(
 
     private fun isInsideBounds(coord: Coord) = coord.y in 0 until height() && coord.x in 0 until width()
 
-    fun transpose(): Matrix<T> {
-        val transpose = MutableList(width()) { MutableList(height()) { defaultValue } }
+    fun rotateLeft() = transpose().reflectHorizontally()
+
+    fun rotateRight() = transpose().reflectVertically()
+
+    fun reflectHorizontally() = Matrix(rows().reversed(), defaultValue)
+
+    fun reflectVertically() = transpose().reflectHorizontally().transpose()
+
+    private fun transpose(): Matrix<T> {
+        val transposed = MutableList(width()) { MutableList(height()) { defaultValue } }
         for (i in 0 until height()) {
             for (j in 0 until width()) {
-                transpose[j][i] = matrix[i][j]
+                transposed[j][i] = matrix[i][j]
             }
         }
-        return Matrix(transpose, defaultValue)
+        return Matrix(transposed, defaultValue)
     }
 
     fun restrictToRows(fromIndex: Int, toIndex: Int) =
