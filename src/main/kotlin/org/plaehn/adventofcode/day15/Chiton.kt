@@ -12,12 +12,21 @@ import org.plaehn.adventofcode.common.Matrix
 
 class Chiton(private val riskLevelMap: Matrix<Int>) {
 
-    private val graph: ValueGraph<Coord, Int>
+    fun computeLowestTotalRisk(): Int {
+        val graph = buildGraph(riskLevelMap)
+        val shortestPathTree = computeShortestPathTree(graph, Coord(0, 0))
+        val shortestPath = shortestPath(
+            shortestPathTree = shortestPathTree,
+            start = Coord(0, 0),
+            end = Coord(riskLevelMap.width() - 1, riskLevelMap.height() - 1)
+        )
+        return shortestPath.drop(1).sumOf { riskLevelMap[it.y][it.x] }
+    }
 
-    init {
+    private fun buildGraph(riskLevelMap: Matrix<Int>): ValueGraph<Coord, Int> {
         val mutableGraph: MutableValueGraph<Coord, Int> = ValueGraphBuilder
             .directed()
-            .expectedNodeCount(riskLevelMap.height() * riskLevelMap.width())
+            .expectedNodeCount(riskLevelMap.height() * this.riskLevelMap.width())
             .build()
         riskLevelMap.toMap().forEach { (coord, risk) ->
             mutableGraph.addNode(coord)
@@ -26,15 +35,8 @@ class Chiton(private val riskLevelMap: Matrix<Int>) {
                 mutableGraph.putEdgeValue(coord, neighbor, risk)
             }
         }
-        graph = ImmutableValueGraph.copyOf(mutableGraph)
+        return ImmutableValueGraph.copyOf(mutableGraph)
     }
-
-    fun computeLowestTotalRisk() =
-        shortestPath(
-            shortestPathTree = computeShortestPathTree(graph, Coord(0, 0)),
-            start = Coord(0, 0),
-            end = Coord(riskLevelMap.width() - 1, riskLevelMap.height() - 1)
-        ).drop(1).sumOf { riskLevelMap[it.y][it.x] }
 
     companion object {
         fun fromInputLines(inputLines: List<String>) =
