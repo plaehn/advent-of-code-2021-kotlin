@@ -39,12 +39,33 @@ class Chiton(private val riskLevelMap: Matrix<Int>) {
     }
 
     companion object {
-        fun fromInputLines(inputLines: List<String>) =
-            Chiton(
-                Matrix.fromRows(
-                    rows = inputLines.map { inputLine -> inputLine.map { it.digitToInt() } },
-                    defaultValue = 0
-                )
+        fun fromInputLines(
+            inputLines: List<String>,
+            tileCount: Int = 1
+        ): Chiton {
+            val rows: List<List<Int>> =
+                inputLines
+                    .map { inputLine -> computeTileRow(tileCount, inputLine) }
+
+            val tileRows: List<List<Int>> = (0 until tileCount).fold(emptyList()) { tileRow, tileNumber ->
+                tileRow + rows.map { row ->
+                    row.map { (it + tileNumber - 1) % 9 + 1 }
+                }
+
+            }
+
+            val matrix = Matrix.fromRows(rows = tileRows, defaultValue = 0)
+
+            return Chiton(
+                matrix
             )
+        }
+
+        private fun computeTileRow(tileCount: Int, inputLine: String): List<Int> =
+            (0 until tileCount).fold(emptyList()) { row, tileNumber ->
+                row + inputLine.map {
+                    (it.digitToInt() + tileNumber - 1) % 9 + 1
+                }
+            }
     }
 }
