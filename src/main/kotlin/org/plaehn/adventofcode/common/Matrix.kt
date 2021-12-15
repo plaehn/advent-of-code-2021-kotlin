@@ -9,9 +9,9 @@ data class Matrix<T>(
 
     operator fun get(rowNumber: Int): MutableList<T> = matrix[rowNumber]
 
-    private fun width() = matrix.first().size
+    fun width() = matrix.first().size
 
-    private fun height() = matrix.size
+    fun height() = matrix.size
 
     fun replaceAll(transform: (T) -> T) {
         matrix.forEach { row ->
