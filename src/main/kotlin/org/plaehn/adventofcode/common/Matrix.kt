@@ -6,6 +6,12 @@ data class Matrix<T>(
     private val matrix: List<MutableList<T>>,
     private val defaultValue: T
 ) {
+    
+    operator fun get(coord: Coord) = this[coord.y][coord.x]
+
+    operator fun set(coord: Coord, value: T) {
+        this[coord.y][coord.x] = value
+    }
 
     operator fun get(rowNumber: Int): MutableList<T> = matrix[rowNumber]
 

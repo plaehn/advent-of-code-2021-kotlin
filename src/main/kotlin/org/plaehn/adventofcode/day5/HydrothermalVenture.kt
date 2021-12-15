@@ -35,10 +35,10 @@ class HydrothermalVenture(
 
         var pos = line.start
         do {
-            matrix[pos.y][pos.x] += 1
+            matrix[pos] += 1
             pos += step
         } while (pos != line.end)
-        matrix[pos.y][pos.x] += 1
+        matrix[pos] += 1
     }
 
     companion object {

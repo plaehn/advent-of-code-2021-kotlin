@@ -19,7 +19,7 @@ class SmokeBasin(
     private fun findBasin(coord: Coord, height: Int): MutableSet<Coord> {
         val basin = mutableSetOf(coord)
         heightmap.neighbors(coord).forEach { neighbor ->
-            val neighborHeight = heightmap[neighbor.y][neighbor.x]
+            val neighborHeight = heightmap[neighbor]
             if (!basin.contains(neighbor) && neighborHeight > height && neighborHeight != 9) {
                 basin += neighbor
                 basin += findBasin(neighbor, neighborHeight)
@@ -40,7 +40,7 @@ class SmokeBasin(
     private fun isLowPoint(coord: Coord) =
         heightmap
             .neighbors(coord)
-            .all { neighbor -> heightmap[coord.y][coord.x] < heightmap[neighbor.y][neighbor.x] }
+            .all { neighbor -> heightmap[coord] < heightmap[neighbor] }
 
     companion object {
         fun fromInputLines(inputLines: List<String>): SmokeBasin {

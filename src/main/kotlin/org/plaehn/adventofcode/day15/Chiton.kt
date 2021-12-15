@@ -8,32 +8,29 @@ import java.util.*
 class Chiton(private val riskLevelMap: Matrix<Int>) {
 
     fun computeLowestTotalRisk(): Int {
-        return traverse()
-    }
-
-    private fun traverse(): Int {
         val destination = Coord(riskLevelMap.width() - 1, riskLevelMap.height() - 1)
-
         val toBeEvaluated = PriorityQueue<Traversal>().apply { add(Traversal(Coord(0, 0), 0)) }
         val visited = mutableSetOf<Coord>()
 
         while (toBeEvaluated.isNotEmpty()) {
             val thisPlace = toBeEvaluated.poll()
-            if (thisPlace.coord == destination) {
-                return thisPlace.totalRisk
-            }
-            if (thisPlace.coord !in visited) {
-                visited.add(thisPlace.coord)
-                riskLevelMap.neighbors(thisPlace.coord)
-                    .filter { it.x in (0..destination.x) && it.y in (0..destination.y) }
-                    .forEach { toBeEvaluated.offer(Traversal(it, thisPlace.totalRisk + riskLevelMap[it.y][it.x])) }
+            when (thisPlace.coord) {
+                destination -> return thisPlace.totalRisk
+                !in visited -> {
+                    visited.add(thisPlace.coord)
+                    riskLevelMap
+                        .neighbors(thisPlace.coord)
+                        .forEach {
+                            toBeEvaluated.offer(Traversal(it, thisPlace.totalRisk + riskLevelMap[it]))
+                        }
+                }
             }
         }
         error("No path to destination")
     }
 
     private class Traversal(val coord: Coord, val totalRisk: Int) : Comparable<Traversal> {
-        override fun compareTo(other: Traversal): Int = this.totalRisk - other.totalRisk
+        override fun compareTo(other: Traversal) = this.totalRisk - other.totalRisk
     }
 
     companion object {

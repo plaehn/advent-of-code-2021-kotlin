@@ -31,7 +31,7 @@ class DumboOctopusGrid(
             }
         } while (newFlashers.isNotEmpty())
 
-        flashers.forEach { coord -> matrix[coord.y][coord.x] = 0 }
+        flashers.forEach { coord -> matrix[coord] = 0 }
 
         return flashers.size
     }
@@ -48,7 +48,7 @@ class DumboOctopusGrid(
         matrix
             .neighbors(coord, includeDiagonals = true)
             .forEach { neighbor ->
-                matrix[neighbor.y][neighbor.x] += 1
+                matrix[neighbor] += 1
             }
     }
 
