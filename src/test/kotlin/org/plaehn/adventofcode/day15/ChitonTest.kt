@@ -15,7 +15,7 @@ internal class ChitonTest {
 
         val solution = chiton.computeLowestTotalRisk()
 
-        assertThat(solution).isEqualTo(8)
+        assertThat(solution).isEqualTo(7)
     }
 
     @Test
@@ -27,5 +27,16 @@ internal class ChitonTest {
         val solution = chiton.computeLowestTotalRisk()
 
         assertThat(solution).isEqualTo(40)
+    }
+
+    @Test
+    fun `Compute lowest total risk for puzzle input`() {
+        val inputLines = this::class.java.readLines("puzzle_input.txt")
+
+        val chiton = Chiton.fromInputLines(inputLines)
+
+        val solution = chiton.computeLowestTotalRisk()
+
+        assertThat(solution).isEqualTo(707)
     }
 }
