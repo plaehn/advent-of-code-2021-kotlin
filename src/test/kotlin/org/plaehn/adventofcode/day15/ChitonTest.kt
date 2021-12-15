@@ -70,6 +70,6 @@ internal class ChitonTest {
 
         val solution = chiton.computeLowestTotalRisk()
 
-        assertThat(solution).isEqualTo(315)
+        assertThat(solution).isEqualTo(2942)
     }
 }

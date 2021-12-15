@@ -1,41 +1,39 @@
 package org.plaehn.adventofcode.day15
 
-import com.google.common.graph.ImmutableValueGraph
-import com.google.common.graph.MutableValueGraph
-import com.google.common.graph.ValueGraph
-import com.google.common.graph.ValueGraphBuilder
 import org.plaehn.adventofcode.common.Coord
-import org.plaehn.adventofcode.common.Dijkstra.computeShortestPathTree
-import org.plaehn.adventofcode.common.Dijkstra.shortestPath
 import org.plaehn.adventofcode.common.Matrix
+import java.util.*
 
 
 class Chiton(private val riskLevelMap: Matrix<Int>) {
 
     fun computeLowestTotalRisk(): Int {
-        val graph = buildGraph(riskLevelMap)
-        val shortestPathTree = computeShortestPathTree(graph, Coord(0, 0))
-        val shortestPath = shortestPath(
-            shortestPathTree = shortestPathTree,
-            start = Coord(0, 0),
-            end = Coord(riskLevelMap.width() - 1, riskLevelMap.height() - 1)
-        )
-        return shortestPath.drop(1).sumOf { riskLevelMap[it.y][it.x] }
+        return traverse()
     }
 
-    private fun buildGraph(riskLevelMap: Matrix<Int>): ValueGraph<Coord, Int> {
-        val mutableGraph: MutableValueGraph<Coord, Int> = ValueGraphBuilder
-            .directed()
-            .expectedNodeCount(riskLevelMap.height() * this.riskLevelMap.width())
-            .build()
-        riskLevelMap.toMap().forEach { (coord, risk) ->
-            mutableGraph.addNode(coord)
-            riskLevelMap.neighbors(coord).forEach { neighbor ->
-                mutableGraph.addNode(neighbor)
-                mutableGraph.putEdgeValue(coord, neighbor, risk)
+    private fun traverse(): Int {
+        val destination = Coord(riskLevelMap.width() - 1, riskLevelMap.height() - 1)
+
+        val toBeEvaluated = PriorityQueue<Traversal>().apply { add(Traversal(Coord(0, 0), 0)) }
+        val visited = mutableSetOf<Coord>()
+
+        while (toBeEvaluated.isNotEmpty()) {
+            val thisPlace = toBeEvaluated.poll()
+            if (thisPlace.coord == destination) {
+                return thisPlace.totalRisk
+            }
+            if (thisPlace.coord !in visited) {
+                visited.add(thisPlace.coord)
+                riskLevelMap.neighbors(thisPlace.coord)
+                    .filter { it.x in (0..destination.x) && it.y in (0..destination.y) }
+                    .forEach { toBeEvaluated.offer(Traversal(it, thisPlace.totalRisk + riskLevelMap[it.y][it.x])) }
             }
         }
-        return ImmutableValueGraph.copyOf(mutableGraph)
+        error("No path to destination")
+    }
+
+    private class Traversal(val coord: Coord, val totalRisk: Int) : Comparable<Traversal> {
+        override fun compareTo(other: Traversal): Int = this.totalRisk - other.totalRisk
     }
 
     companion object {
@@ -43,22 +41,15 @@ class Chiton(private val riskLevelMap: Matrix<Int>) {
             inputLines: List<String>,
             tileCount: Int = 1
         ): Chiton {
-            val rows: List<List<Int>> =
-                inputLines
-                    .map { inputLine -> computeTileRow(tileCount, inputLine) }
+            val firstTileRow = inputLines.map { inputLine -> computeTileRow(tileCount, inputLine) }
 
-            val tileRows: List<List<Int>> = (0 until tileCount).fold(emptyList()) { tileRow, tileNumber ->
-                tileRow + rows.map { row ->
+            val tileRows = (1 until tileCount).fold(firstTileRow) { tileRow, tileNumber ->
+                tileRow + firstTileRow.map { row ->
                     row.map { (it + tileNumber - 1) % 9 + 1 }
                 }
-
             }
 
-            val matrix = Matrix.fromRows(rows = tileRows, defaultValue = 0)
-
-            return Chiton(
-                matrix
-            )
+            return Chiton(Matrix.fromRows(rows = tileRows, defaultValue = 0))
         }
 
         private fun computeTileRow(tileCount: Int, inputLine: String): List<Int> =
