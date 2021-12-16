@@ -24,10 +24,10 @@ internal class PacketDecoderTest {
 
         assertThat(packet).isEqualTo(
             Packet(
-                version = 1, typeId = 6, value = 0,
+                version = 1, typeId = 6, constantValue = 0,
                 subPackets = listOf(
-                    Packet(version = 6, typeId = 4, value = 10, subPackets = emptyList()),
-                    Packet(version = 2, typeId = 4, value = 20, subPackets = emptyList())
+                    Packet(version = 6, typeId = 4, constantValue = 10, subPackets = emptyList()),
+                    Packet(version = 2, typeId = 4, constantValue = 20, subPackets = emptyList())
                 )
             )
         )
@@ -41,11 +41,11 @@ internal class PacketDecoderTest {
 
         assertThat(packet).isEqualTo(
             Packet(
-                version = 7, typeId = 3, value = 0,
+                version = 7, typeId = 3, constantValue = 0,
                 subPackets = listOf(
-                    Packet(version = 2, typeId = 4, value = 1, subPackets = emptyList()),
-                    Packet(version = 4, typeId = 4, value = 2, subPackets = emptyList()),
-                    Packet(version = 1, typeId = 4, value = 3, subPackets = emptyList())
+                    Packet(version = 2, typeId = 4, constantValue = 1, subPackets = emptyList()),
+                    Packet(version = 4, typeId = 4, constantValue = 2, subPackets = emptyList()),
+                    Packet(version = 1, typeId = 4, constantValue = 3, subPackets = emptyList())
                 )
             )
         )
@@ -65,5 +65,24 @@ internal class PacketDecoderTest {
         val input = this::class.java.slurp("puzzle_input.txt")
 
         assertThat(PacketDecoder(input).sumOfVersionNumbersOfAllPackets()).isEqualTo(879)
+    }
+
+    @Test
+    fun `Calculate value for test inputs`() {
+        assertThat(PacketDecoder("C200B40A82").calculateValue()).isEqualTo(3)
+        assertThat(PacketDecoder("04005AC33890").calculateValue()).isEqualTo(54)
+        assertThat(PacketDecoder("880086C3E88112").calculateValue()).isEqualTo(7)
+        assertThat(PacketDecoder("CE00C43D881120").calculateValue()).isEqualTo(9)
+        assertThat(PacketDecoder("D8005AC2A8F0").calculateValue()).isEqualTo(1)
+        assertThat(PacketDecoder("F600BC2D8F").calculateValue()).isEqualTo(0)
+        assertThat(PacketDecoder("9C005AC2F8F0").calculateValue()).isEqualTo(0)
+        assertThat(PacketDecoder("9C0141080250320F1802104A08").calculateValue()).isEqualTo(1)
+    }
+
+    @Test
+    fun `Calculate value for puzzle inputs`() {
+        val input = this::class.java.slurp("puzzle_input.txt")
+
+        assertThat(PacketDecoder(input).calculateValue()).isEqualTo(539051801941)
     }
 }

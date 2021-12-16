@@ -1,16 +1,18 @@
 package org.plaehn.adventofcode.day16
 
 import com.google.common.annotations.VisibleForTesting
+import org.plaehn.adventofcode.common.productOf
 
 class PacketDecoder(input: String) {
 
     private val binaryString = input.toBinaryString()
     private var index = 0
 
-    fun sumOfVersionNumbersOfAllPackets(): Int {
-        val packet = parse()
-        return (packet.allSubPackets + packet).sumOf { it.version }
-    }
+    fun calculateValue() =
+        parse().value
+
+    fun sumOfVersionNumbersOfAllPackets() =
+        parse().let { packet -> (packet.allSubPackets + packet).sumOf { it.version } }
 
     @VisibleForTesting
     internal fun parse(): Packet {
@@ -75,9 +77,23 @@ internal fun String.toHexString() =
 data class Packet(
     val version: Int,
     val typeId: Int,
-    val value: Long = 0,
+    val constantValue: Long = 0,
     val subPackets: List<Packet> = emptyList()
 ) {
     val allSubPackets: List<Packet>
         get() = subPackets + subPackets.flatMap { it.allSubPackets }
+
+    val value: Long
+        get() = when (typeId) {
+            0 -> subPackets.sumOf { it.value }
+            1 -> subPackets.productOf { it.value }
+            2 -> subPackets.minOf { it.value }
+            3 -> subPackets.maxOf { it.value }
+            4 -> constantValue
+            5 -> if (subPackets[0].value > subPackets[1].value) 1 else 0
+            6 -> if (subPackets[0].value < subPackets[1].value) 1 else 0
+            7 -> if (subPackets[0].value == subPackets[1].value) 1 else 0
+            else -> error("Unknown typeId $typeId")
+        }
 }
+
