@@ -6,17 +6,23 @@ import kotlin.math.sign
 class TrickShot(private val targetArea: TargetArea) {
 
     fun computeHighestVerticalPositionOfAllSuccessfulShots() =
+        computeHighestVerticalPositionForAllInitialVelocitiesThatHitTargetArea().maxOrNull()!!
+
+    fun countInitialVelocitiesThatHitTargetArea() =
+        computeHighestVerticalPositionForAllInitialVelocitiesThatHitTargetArea().count()
+
+    private fun computeHighestVerticalPositionForAllInitialVelocitiesThatHitTargetArea() =
         computeHorizontalVelocityRange().map { horizontalVelocity ->
             computeVerticalVelocityRange().map { verticalVelocity ->
                 shoot(initialVelocity = Coord(horizontalVelocity, verticalVelocity))
             }
-        }.flatten().maxOrNull()!!
+        }.flatten().filter { it > Int.MIN_VALUE }
 
     private fun computeHorizontalVelocityRange() =
         (1..targetArea.lowerRight.x)
 
     private fun computeVerticalVelocityRange() =
-        (targetArea.lowerRight.y..270)
+        (targetArea.lowerRight.y..-1 * targetArea.lowerRight.y)
 
     private fun shoot(initialVelocity: Coord): Int {
         var maxY = Int.MIN_VALUE

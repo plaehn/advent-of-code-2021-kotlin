@@ -23,4 +23,22 @@ internal class TrickShotTest {
 
         assertThat(maxY).isEqualTo(35511)
     }
+
+    @Test
+    fun `Count initial velocities that hit for test input`() {
+        val trickShot = TrickShot.fromInput("target area: x=20..30, y=-10..-5")
+
+        val maxY = trickShot.countInitialVelocitiesThatHitTargetArea()
+
+        assertThat(maxY).isEqualTo(112)
+    }
+
+    @Test
+    fun `Count initial velocities that hit for puzzle input`() {
+        val trickShot = TrickShot.fromInput("target area: x=14..50, y=-267..-225")
+
+        val maxY = trickShot.countInitialVelocitiesThatHitTargetArea()
+
+        assertThat(maxY).isEqualTo(3282)
+    }
 }
