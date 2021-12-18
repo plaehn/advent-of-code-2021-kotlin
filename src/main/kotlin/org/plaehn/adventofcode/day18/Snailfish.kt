@@ -70,27 +70,29 @@ data class SnailFishNumber(val surface: String) {
         val regularPair = regularPairRegex.matchEntire(pair) ?: error("Explode on non-regular pair")
         val (left, right) = regularPair.destructured.toList().map { it.toInt() }
 
-        val numToRight = numberRegex.find(this, startIndex = index + regularPair.value.length)
-        val numToLeft = numberRegex.find(this.reversed(), startIndex = length - index - 1)
+        val numberToRightMatch = numberRegex.find(this, startIndex = index + regularPair.value.length)
+        val numberToLeftMatch = numberRegex.find(this.reversed(), startIndex = length - index - 1)
 
-        var newStr = ""
-        if (numToLeft != null) {
-            newStr += substring(0, this.length - numToLeft.range.last - 1)
-            newStr += left + numToLeft.value.reversed().toInt()
-            newStr += substring(this.length - numToLeft.range.first, index)
-        } else {
-            newStr += substring(0, index)
-        }
-        newStr += "0"
-        if (numToRight != null) {
-            newStr += substring(index + regularPair.value.length, numToRight.range.first)
-            newStr += right + numToRight.value.toInt()
-            newStr += substring(numToRight.range.last + 1)
-        } else {
-            newStr += substring(index + regularPair.value.length)
-        }
-        return newStr
+        return increaseNumberToRight(right, numberToRightMatch)
+            .replaceRange(index, index + pair.length, "0")
+            .increaseNumberToLeft(left, numberToLeftMatch, length)
     }
+
+    private fun String.increaseNumberToRight(summand: Int, numToRight: MatchResult?) =
+        if (numToRight == null)
+            this
+        else
+            replaceRange(numToRight.range, (summand + numToRight.value.toInt()).toString())
+
+    private fun String.increaseNumberToLeft(summand: Int, numToLeft: MatchResult?, length: Int) =
+        if (numToLeft == null)
+            this
+        else
+            replaceRange(
+                length - numToLeft.range.last - 1,
+                length - numToLeft.range.first,
+                (summand + numToLeft.value.reversed().toInt()).toString()
+            )
 
     private fun trySplit(str: String): String? {
         val regularNumberGreaterNine = numberGreaterNineRegex.find(str)
@@ -126,4 +128,5 @@ data class SnailFishNumber(val surface: String) {
         private val numberGreaterNineRegex = "\\d{2,}".toRegex()
     }
 }
+
 
