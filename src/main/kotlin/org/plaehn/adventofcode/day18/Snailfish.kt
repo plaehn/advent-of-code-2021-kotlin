@@ -32,9 +32,6 @@ class Snailfish(private val numbersToSum: List<SnailFishNumber>) {
 
 data class SnailFishNumber(val surface: String) {
 
-    private val regularPairRegex = "\\[(\\d+),(\\d+)]".toRegex()
-    private val numberRegex = "\\d+".toRegex()
-
     fun addAndReduce(summand: SnailFishNumber) = (this + summand).reduce()
 
     operator fun plus(summand: SnailFishNumber) =
@@ -58,20 +55,6 @@ data class SnailFishNumber(val surface: String) {
         return null
     }
 
-    private fun trySplit(str: String): String? {
-        str.forEachIndexed { index, ch ->
-            when (ch) {
-                in '0'..'9' -> {
-                    val regularNumber = str.findRegularNumberStartingAt(index)
-                    if (regularNumber >= 10) {
-                        return str.split(regularNumber, index)
-                    }
-                }
-            }
-        }
-        return null
-    }
-
     private fun String.pairStartingAt(startIndex: Int): String {
         var nestingDepth = 0
         substring(startIndex).forEachIndexed { index, ch ->
@@ -85,7 +68,7 @@ data class SnailFishNumber(val surface: String) {
 
     private fun String.explode(pair: String, index: Int): String {
         val regularPair = regularPairRegex.matchEntire(pair) ?: error("Explode on non-regular pair")
-        val (left, right) = regularPair.destructured
+        val (left, right) = regularPair.destructured.toList().map { it.toInt() }
 
         val numToRight = numberRegex.find(this, startIndex = index + regularPair.value.length)
         val numToLeft = numberRegex.find(this.reversed(), startIndex = length - index - 1)
@@ -93,7 +76,7 @@ data class SnailFishNumber(val surface: String) {
         var newStr = ""
         if (numToLeft != null) {
             newStr += substring(0, this.length - numToLeft.range.last - 1)
-            newStr += left.toInt() + numToLeft.value.reversed().toInt()
+            newStr += left + numToLeft.value.reversed().toInt()
             newStr += substring(this.length - numToLeft.range.first, index)
         } else {
             newStr += substring(0, index)
@@ -101,7 +84,7 @@ data class SnailFishNumber(val surface: String) {
         newStr += "0"
         if (numToRight != null) {
             newStr += substring(index + regularPair.value.length, numToRight.range.first)
-            newStr += right.toInt() + numToRight.value.toInt()
+            newStr += right + numToRight.value.toInt()
             newStr += substring(numToRight.range.last + 1)
         } else {
             newStr += substring(index + regularPair.value.length)
@@ -109,8 +92,13 @@ data class SnailFishNumber(val surface: String) {
         return newStr
     }
 
-    private fun String.findRegularNumberStartingAt(index: Int) =
-        numberRegex.find(this, index)?.value?.toInt() ?: error("No regular number found")
+    private fun trySplit(str: String): String? {
+        val regularNumberGreaterNine = numberGreaterNineRegex.find(str)
+        if (regularNumberGreaterNine != null) {
+            return str.split(regularNumberGreaterNine.value.toInt(), regularNumberGreaterNine.range.first)
+        }
+        return null
+    }
 
     private fun String.split(regularNumber: Int, index: Int): String {
         val left = floor(regularNumber / 2.0).toInt()
@@ -131,5 +119,11 @@ data class SnailFishNumber(val surface: String) {
     }
 
     private fun findFirstRegularPair(str: String) = regularPairRegex.find(str)
+
+    companion object {
+        private val regularPairRegex = "\\[(\\d+),(\\d+)]".toRegex()
+        private val numberRegex = "\\d+".toRegex()
+        private val numberGreaterNineRegex = "\\d{2,}".toRegex()
+    }
 }
 
