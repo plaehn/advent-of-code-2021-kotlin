@@ -1,5 +1,6 @@
 package org.plaehn.adventofcode.day18
 
+import org.plaehn.adventofcode.common.combinations
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -9,6 +10,19 @@ class Snailfish(private val numbersToSum: List<SnailFishNumber>) {
         numbersToSum
             .reduce(SnailFishNumber::addAndReduce)
             .magnitude()
+
+    fun computeMaxMagnitude() =
+        allPairs()
+            .map { it.first.addAndReduce(it.second).magnitude() }
+            .maxOrNull()!!
+
+    private fun allPairs() =
+        sequence {
+            numbersToSum.toSet().combinations(2).forEach { pair ->
+                yield(pair.first() to pair.last())
+                yield(pair.last() to pair.first())
+            }
+        }
 
     companion object {
         fun fromInputLines(inputLines: List<String>) =
@@ -102,8 +116,7 @@ data class SnailFishNumber(val surface: String) {
         val left = floor(regularNumber / 2.0).toInt()
         val right = ceil(regularNumber / 2.0).toInt()
         val replacement = "[$left,$right]"
-        val newStr = replaceRange(index, index + regularNumber.toString().length, replacement)
-        return newStr
+        return replaceRange(index, index + regularNumber.toString().length, replacement)
     }
 
     fun magnitude(): Int {

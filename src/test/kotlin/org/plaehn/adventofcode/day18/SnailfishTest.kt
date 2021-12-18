@@ -24,4 +24,22 @@ internal class SnailfishTest {
 
         assertThat(snailfish.computeMagnitudeOfFinalSum()).isEqualTo(4111)
     }
+
+    @Test
+    fun `Compute max magnitude of all pairs for test input`() {
+        val inputLines = this::class.java.readLines("test_input.txt")
+
+        val snailfish = Snailfish.fromInputLines(inputLines)
+
+        assertThat(snailfish.computeMaxMagnitude()).isEqualTo(3993)
+    }
+
+    @Test
+    fun `Compute max magnitude of all pairs for puzzle input`() {
+        val inputLines = this::class.java.readLines("puzzle_input.txt")
+
+        val snailfish = Snailfish.fromInputLines(inputLines)
+
+        assertThat(snailfish.computeMaxMagnitude()).isEqualTo(4917)
+    }
 }
