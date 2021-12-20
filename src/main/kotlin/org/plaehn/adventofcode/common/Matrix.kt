@@ -86,17 +86,4 @@ data class Matrix<T>(
     }
 }
 
-data class Coord(val x: Int, val y: Int) {
-    operator fun plus(summand: Coord) = Coord(x + summand.x, y + summand.y)
-
-    fun isCenter() = x == 0 && y == 0
-
-    companion object {
-        fun Companion.fromString(input: String): Coord {
-            val (x, y) = input.split(",")
-            return Coord(x.toInt(), y.toInt())
-        }
-    }
-}
-
 
