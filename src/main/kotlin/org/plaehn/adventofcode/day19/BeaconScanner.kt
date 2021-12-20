@@ -4,29 +4,25 @@ import org.plaehn.adventofcode.common.Coord
 import org.plaehn.adventofcode.common.Coord.Companion.fromString
 import org.plaehn.adventofcode.common.combinations
 import org.plaehn.adventofcode.common.groupByBlankLines
-import kotlin.math.absoluteValue
 
-class BeaconScanner(private val scanners: List<Set<Coord>>) {
+class BeaconScanner(private val scanners: List<Scanner>) {
 
     fun computeMaximumManhattanDistance() =
         reassembleMap()
             .foundScannerPositions
             .combinations(ofSize = 2)
-            .maxOfOrNull { computeManhattanDistance(it.first(), it.last()) }!!
-
-    private fun computeManhattanDistance(first: Coord, second: Coord) =
-        (first.x - second.x).absoluteValue + (first.y - second.y).absoluteValue + (first.z - second.z).absoluteValue
+            .maxOfOrNull { it.first().manhattanDistanceTo(it.last()) }!!
 
     fun computeNumberOfBeacons() = reassembleMap().foundBeacons.size
 
     private fun reassembleMap(): ReassembledMap {
-        val foundBeacons = scanners.first().toMutableSet()
+        val foundBeacons = scanners.first().beacons.toMutableSet()
         val foundScannerPositions = mutableSetOf(Coord(0, 0, 0))
 
-        val remaining = ArrayDeque<Set<Coord>>().apply { addAll(scanners.drop(1)) }
+        val remaining = ArrayDeque<Scanner>().apply { addAll(scanners.drop(1)) }
         while (remaining.isNotEmpty()) {
             val candidate = remaining.removeFirst()
-            val transformed = findFirstOverlappingAndTransformedOrNull(foundBeacons, candidate)
+            val transformed = findFirstOverlappingAndTransformedOrNull(foundBeacons, candidate.beacons)
             if (transformed != null) {
                 foundBeacons.addAll(transformed.beacons)
                 foundScannerPositions.add(transformed.position)
@@ -79,8 +75,19 @@ class BeaconScanner(private val scanners: List<Set<Coord>>) {
     companion object {
         fun fromInput(input: String) =
             BeaconScanner(input.groupByBlankLines().map { scanner ->
-                scanner.lines().drop(1).map { Coord.fromString(it) }.toSet()
+                Scanner.fromInput(scanner)
             })
+    }
+}
+
+data class Scanner(val beacons: Set<Coord>) {
+
+    val fingerprints = beacons.combinations(ofSize = 2).map { coordPair ->
+        coordPair.first().manhattanDistanceTo(coordPair.last())
+    }
+
+    companion object {
+        fun fromInput(input: String) = Scanner(input.lines().drop(1).map { Coord.fromString(it) }.toSet())
     }
 }
 

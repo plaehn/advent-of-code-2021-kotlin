@@ -2,7 +2,6 @@ package org.plaehn.adventofcode.day19
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.plaehn.adventofcode.common.slurp
 
@@ -18,7 +17,7 @@ internal class BeaconScannerTest {
     }
 
     @Test
-    @Disabled("Runs too long")
+    //@Disabled("Runs too long")
     fun `Compute number of beacons for puzzle input`() {
         val input = this::class.java.slurp("puzzle_input.txt")
 
@@ -37,7 +36,7 @@ internal class BeaconScannerTest {
     }
 
     @Test
-    @Disabled("Runs too long")
+    //@Disabled("Runs too long")
     fun `Compute maximum manhattan distance for puzzle input`() {
         val input = this::class.java.slurp("puzzle_input.txt")
 
