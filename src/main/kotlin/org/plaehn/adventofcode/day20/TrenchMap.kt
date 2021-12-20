@@ -4,7 +4,11 @@ import org.plaehn.adventofcode.common.Coord
 import org.plaehn.adventofcode.common.Matrix
 import org.plaehn.adventofcode.common.groupByBlankLines
 
-class TrenchMap(private val matrix: Matrix<Boolean>, private val algorithm: String) {
+class TrenchMap(
+    private val matrix: Matrix<Boolean>,
+    private val algorithm: String,
+    private val numberOfSteps: Int
+) {
 
     private var infinitePixelsAreLit = false
 
@@ -47,9 +51,7 @@ class TrenchMap(private val matrix: Matrix<Boolean>, private val algorithm: Stri
 
     companion object {
 
-        private const val numberOfSteps = 2
-
-        fun fromInput(input: String): TrenchMap {
+        fun fromInput(input: String, numberOfSteps: Int): TrenchMap {
             val (algorithm, image) = input.groupByBlankLines()
             val lines = image.lines()
             val height = lines.size + 2 * numberOfSteps
@@ -60,7 +62,7 @@ class TrenchMap(private val matrix: Matrix<Boolean>, private val algorithm: Stri
                     matrix[x + numberOfSteps][y + numberOfSteps] = ch.isLit()
                 }
             }
-            return TrenchMap(matrix, algorithm)
+            return TrenchMap(matrix, algorithm, numberOfSteps)
         }
     }
 }
