@@ -15,4 +15,13 @@ internal class BeaconScannerTest {
 
         assertThat(beaconScanner.computeNumberOfBeacons()).isEqualTo(79)
     }
+
+    @Test
+    fun `Compute number of beacons for puzzle input`() {
+        val input = this::class.java.slurp("puzzle_input.txt")
+
+        val beaconScanner = BeaconScanner.fromInput(input)
+
+        assertThat(beaconScanner.computeNumberOfBeacons()).isEqualTo(392)
+    }
 }
