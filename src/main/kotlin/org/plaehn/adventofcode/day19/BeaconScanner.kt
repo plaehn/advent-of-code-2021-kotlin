@@ -2,9 +2,20 @@ package org.plaehn.adventofcode.day19
 
 import org.plaehn.adventofcode.common.Coord
 import org.plaehn.adventofcode.common.Coord.Companion.fromString
+import org.plaehn.adventofcode.common.combinations
 import org.plaehn.adventofcode.common.groupByBlankLines
+import kotlin.math.absoluteValue
 
 class BeaconScanner(private val scanners: List<Set<Coord>>) {
+
+    fun computeMaximumManhattanDistance() =
+        reassembleMap()
+            .foundScannerPositions
+            .combinations(ofSize = 2)
+            .maxOfOrNull { computeManhattanDistance(it.first(), it.last()) }!!
+
+    private fun computeManhattanDistance(first: Coord, second: Coord) =
+        (first.x - second.x).absoluteValue + (first.y - second.y).absoluteValue + (first.z - second.z).absoluteValue
 
     fun computeNumberOfBeacons() = reassembleMap().foundBeacons.size
 
