@@ -6,7 +6,7 @@ data class Matrix<T>(
     private val matrix: List<MutableList<T>>,
     private val defaultValue: T
 ) {
-    
+
     operator fun get(coord: Coord) = this[coord.y][coord.x]
 
     operator fun set(coord: Coord, value: T) {
@@ -53,7 +53,7 @@ data class Matrix<T>(
             .filter { !it.isCenter() }
             .filter { includeDiagonals || it.x == 0 || it.y == 0 }
 
-    private fun isInsideBounds(coord: Coord) = coord.y in 0 until height() && coord.x in 0 until width()
+    fun isInsideBounds(coord: Coord) = coord.y in 0 until height() && coord.x in 0 until width()
 
     private fun transpose(): Matrix<T> {
         val transposed = MutableList(width()) { MutableList(height()) { defaultValue } }
