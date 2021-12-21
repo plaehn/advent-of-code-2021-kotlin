@@ -4,6 +4,7 @@ import org.plaehn.adventofcode.common.Coord
 import org.plaehn.adventofcode.common.Coord.Companion.fromString
 import org.plaehn.adventofcode.common.combinations
 import org.plaehn.adventofcode.common.groupByBlankLines
+import java.util.*
 
 class BeaconScanner(private val scanners: List<Scanner>) {
 
@@ -17,32 +18,38 @@ class BeaconScanner(private val scanners: List<Scanner>) {
 
     private fun reassembleMap(): ReassembledMap {
         val foundBeacons = scanners.first().beacons.toMutableSet()
+        val foundFingerprints = scanners.first().fingerprints.toMutableSet()
         val foundScannerPositions = mutableSetOf(Coord(0, 0, 0))
 
-        val remaining = ArrayDeque<Scanner>().apply { addAll(scanners.drop(1)) }
+        scanners.drop(1).forEach { it.computeOverlapSizeWith(foundFingerprints) }
+        val remaining = PriorityQueue<Scanner>().apply { addAll(scanners.drop(1)) }
         while (remaining.isNotEmpty()) {
-            val candidate = remaining.removeFirst()
-            val transformed = findFirstOverlappingAndTransformedOrNull(foundBeacons, candidate.beacons)
+            val candidate = remaining.remove()
+
+            val transformed = findFirstOverlappingAndTransformedOrNull(foundBeacons, candidate)
             if (transformed != null) {
                 foundBeacons.addAll(transformed.beacons)
+                foundFingerprints.addAll(transformed.fingerprints)
                 foundScannerPositions.add(transformed.position)
+                remaining.forEach { it.computeOverlapSizeWith(foundFingerprints) }
             } else {
+                candidate.distance = 0
                 remaining.add(candidate)
             }
         }
         return ReassembledMap(foundBeacons, foundScannerPositions)
     }
 
-    private fun findFirstOverlappingAndTransformedOrNull(foundBeacons: Set<Coord>, candidate: Set<Coord>) =
+    private fun findFirstOverlappingAndTransformedOrNull(foundBeacons: Set<Coord>, candidate: Scanner) =
         (0..5).firstNotNullOfOrNull { face ->
             (0..3).firstNotNullOfOrNull { rotation ->
-                val reorientedCandidate = candidate.map { it.face(face).rotate(rotation) }.toSet()
+                val reorientedCandidate = candidate.beacons.map { it.face(face).rotate(rotation) }.toSet()
                 foundBeacons.firstNotNullOfOrNull { b1 ->
                     reorientedCandidate.firstNotNullOfOrNull { b2 ->
                         val offset = b1 - b2
                         val movedCandidate = reorientedCandidate.map { it + offset }.toSet()
                         if (movedCandidate.intersect(foundBeacons).size >= 12) {
-                            TransformedScanner(offset, movedCandidate)
+                            TransformedScanner(offset, movedCandidate, candidate.fingerprints)
                         } else {
                             null
                         }
@@ -80,17 +87,24 @@ class BeaconScanner(private val scanners: List<Scanner>) {
     }
 }
 
-data class Scanner(val beacons: Set<Coord>) {
+data class Scanner(val beacons: Set<Coord>) : Comparable<Scanner> {
+    var distance: Int = Int.MAX_VALUE
 
     val fingerprints = beacons.combinations(ofSize = 2).map { coordPair ->
         coordPair.first().manhattanDistanceTo(coordPair.last())
+    }.toSet()
+
+    fun computeOverlapSizeWith(foundFingerprints: Set<Int>) {
+        distance = (foundFingerprints intersect fingerprints).size
     }
 
     companion object {
         fun fromInput(input: String) = Scanner(input.lines().drop(1).map { Coord.fromString(it) }.toSet())
     }
+
+    override fun compareTo(other: Scanner) = other.distance - this.distance
 }
 
-data class TransformedScanner(val position: Coord, val beacons: Set<Coord>)
+data class TransformedScanner(val position: Coord, val beacons: Set<Coord>, val fingerprints: Set<Int>)
 
 data class ReassembledMap(val foundBeacons: Set<Coord>, val foundScannerPositions: Set<Coord>)
