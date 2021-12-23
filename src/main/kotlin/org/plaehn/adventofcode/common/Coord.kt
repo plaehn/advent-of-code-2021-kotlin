@@ -13,14 +13,17 @@ data class Coord(val x: Int, val y: Int, val z: Int = 0) {
     fun isCenter() = x == 0 && y == 0 && z == 0
 
     override fun toString() = "$x,$y,$z"
-    
+
     fun manhattanDistanceTo(other: Coord) =
         (x - other.x).absoluteValue + (y - other.y).absoluteValue + (z - other.z).absoluteValue
 
     companion object {
-        fun Companion.fromString(input: String) =
+        fun fromString(input: String) =
             input.split(",").map { it.toInt() }.run {
                 Coord(this[0], this[1], this.getOrElse(2) { 0 })
             }
+
+        fun fromList(input: List<Int>) =
+            Coord(x = input[0], y = input[1], z = input[2])
     }
 }
