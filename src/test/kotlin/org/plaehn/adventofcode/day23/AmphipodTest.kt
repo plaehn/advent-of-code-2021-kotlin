@@ -12,7 +12,7 @@ internal class AmphipodTest {
         val inputLines = this::class.java.readLines("test_input.txt")
 
         val amphipod = Amphipod.fromInputLines(inputLines)
-        val energy = amphipod.computeLeastEnergyToOrganizeAmphipods()
+        val energy = amphipod.solvePart1()
 
         assertThat(energy).isEqualTo(12521)
     }
@@ -22,7 +22,7 @@ internal class AmphipodTest {
         val inputLines = this::class.java.readLines("puzzle_input.txt")
 
         val amphipod = Amphipod.fromInputLines(inputLines)
-        val energy = amphipod.computeLeastEnergyToOrganizeAmphipods()
+        val energy = amphipod.solvePart1()
 
         assertThat(energy).isEqualTo(18051)
     }
