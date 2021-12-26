@@ -91,14 +91,14 @@ data class Burrow(val hallway: Hallway, val rooms: List<Room>) {
             (hallwayIndexAboveRoom + 1 until hallwayIndex).all { this.hallway.spots[it].isOpenSpace() }
         }
 
-    fun isSolution() = rooms.map { "${it.upper}${it.lower}" } == listOf("AA", "BB", "CC", "DD")
+    fun isSolution() = rooms.map { "${it.spots[0]}${it.spots[1]}" } == listOf("AA", "BB", "CC", "DD")
 
     override fun toString(): String {
         var str = '#'.repeat(hallway.spots.size + 2) + '\n'
         str += "#$hallway#\n"
         str += '#'.repeat(3)
-        str += rooms.joinToString("") { it.upper + "#" } + "##\n"
-        str += "  #" + rooms.joinToString("") { it.lower + "#" } + "##\n"
+        str += rooms.joinToString("") { it.spots[0] + "#" } + "##\n"
+        str += "  #" + rooms.joinToString("") { it.spots[1] + "#" } + "##\n"
         str += "  " + '#'.repeat(hallway.spots.size - 2)
         return str
     }
@@ -108,7 +108,7 @@ data class Burrow(val hallway: Hallway, val rooms: List<Room>) {
     private fun List<Room>.replace(roomIndex: Int, indexInRoom: Int, newChar: Char) =
         mapIndexed { index, room ->
             if (index == roomIndex) {
-                if (indexInRoom == 0) Room(newChar, room.lower) else Room(room.upper, newChar)
+                if (indexInRoom == 0) Room(listOf(newChar, room.spots[1])) else Room(listOf(room.spots[0], newChar))
             } else {
                 room
             }
@@ -122,7 +122,7 @@ data class Burrow(val hallway: Hallway, val rooms: List<Room>) {
             }
             val rooms = roomsTopDown.first()
                 .zip(roomsTopDown.last())
-                .map { Room(it.first, it.second) }
+                .map { Room(listOf(it.first, it.second)) }
             val hallway = Hallway(List(hallwayLength) { '.' })
             return Burrow(hallway, rooms)
         }

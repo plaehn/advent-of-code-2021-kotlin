@@ -6,6 +6,8 @@ class Amphipod(private val initialBurrow: Burrow) {
 
     fun solvePart1() = computeLeastEnergyToOrganizeAmphipods(initialBurrow)
 
+    fun solvePart2() = computeLeastEnergyToOrganizeAmphipods(initialBurrow)
+
     private fun computeLeastEnergyToOrganizeAmphipods(initialBurrow: Burrow): Int {
         val candidates = PriorityQueue<BurrowWithCost>().apply { add(BurrowWithCost(initialBurrow, 0)) }
         val visited = mutableSetOf<BurrowWithCost>()

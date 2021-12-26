@@ -8,7 +8,7 @@ import org.plaehn.adventofcode.common.readLines
 internal class AmphipodTest {
 
     @Test
-    fun `Compute number of cubes that are on after reboot for test input`() {
+    fun `Solve part 1 for test input`() {
         val inputLines = this::class.java.readLines("test_input.txt")
 
         val amphipod = Amphipod.fromInputLines(inputLines)
@@ -18,7 +18,7 @@ internal class AmphipodTest {
     }
 
     @Test
-    fun `Compute number of cubes that are on after reboot for puzzle input`() {
+    fun `Solve part 1 for puzzle input`() {
         val inputLines = this::class.java.readLines("puzzle_input.txt")
 
         val amphipod = Amphipod.fromInputLines(inputLines)
@@ -27,4 +27,23 @@ internal class AmphipodTest {
         assertThat(energy).isEqualTo(18051)
     }
 
+    @Test
+    fun `Solve part 2 for test input`() {
+        val inputLines = this::class.java.readLines("test_input.txt")
+
+        val amphipod = Amphipod.fromInputLines(inputLines)
+        val energy = amphipod.solvePart2()
+
+        assertThat(energy).isEqualTo(44169)
+    }
+
+    @Test
+    fun `Solve part 2 for puzzle input`() {
+        val inputLines = this::class.java.readLines("puzzle_input.txt")
+
+        val amphipod = Amphipod.fromInputLines(inputLines)
+        val energy = amphipod.solvePart2()
+
+        assertThat(energy).isEqualTo(18051)
+    }
 }
