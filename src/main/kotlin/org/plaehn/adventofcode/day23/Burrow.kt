@@ -1,12 +1,10 @@
-@file:OptIn(ExperimentalStdlibApi::class)
-@file:Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-
 package org.plaehn.adventofcode.day23
 
 import kotlin.math.absoluteValue
 
 data class Burrow(val hallway: Hallway, val rooms: List<Room>) {
 
+    @OptIn(ExperimentalStdlibApi::class)
     fun enumerateLegalMoves() =
         buildList {
             addAll(movesFromHallwayIntoRoom())
@@ -91,24 +89,13 @@ data class Burrow(val hallway: Hallway, val rooms: List<Room>) {
             (hallwayIndexAboveRoom + 1 until hallwayIndex).all { this.hallway.spots[it].isOpenSpace() }
         }
 
-    fun isSolution() = rooms.map { "${it.spots[0]}${it.spots[1]}" } == listOf("AA", "BB", "CC", "DD")
-
-    override fun toString(): String {
-        var str = '#'.repeat(hallway.spots.size + 2) + '\n'
-        str += "#$hallway#\n"
-        str += '#'.repeat(3)
-        str += rooms.joinToString("") { it.spots[0] + "#" } + "##\n"
-        str += "  #" + rooms.joinToString("") { it.spots[1] + "#" } + "##\n"
-        str += "  " + '#'.repeat(hallway.spots.size - 2)
-        return str
-    }
-
-    private fun Char.repeat(number: Int) = (1..number).map { this }.joinToString("")
+    fun isSolution() =
+        rooms.filterIndexed { index, room -> room.containsOnlyAmphipodsLivingHere(index) }.size == rooms.size
 
     private fun List<Room>.replace(roomIndex: Int, indexInRoom: Int, newChar: Char) =
         mapIndexed { index, room ->
             if (index == roomIndex) {
-                if (indexInRoom == 0) Room(listOf(newChar, room.spots[1])) else Room(listOf(room.spots[0], newChar))
+                Room(room.spots.mapIndexed { i, ch -> if (i == indexInRoom) newChar else ch })
             } else {
                 room
             }
@@ -117,12 +104,12 @@ data class Burrow(val hallway: Hallway, val rooms: List<Room>) {
     companion object {
         fun fromInputLines(inputList: List<String>): Burrow {
             val hallwayLength = inputList.drop(1).first().length - 2
-            val roomsTopDown = inputList.drop(2).take(2).map { roomLine ->
+            val roomsTopDown = inputList.drop(2).map { roomLine ->
                 roomLine.filter { it.isOpenSpace() || it.isAmphipod() }
+            }.dropLast(1)
+            val rooms = (0 until roomsTopDown.first().length).map { index ->
+                Room(roomsTopDown.map { it[index] })
             }
-            val rooms = roomsTopDown.first()
-                .zip(roomsTopDown.last())
-                .map { Room(listOf(it.first, it.second)) }
             val hallway = Hallway(List(hallwayLength) { '.' })
             return Burrow(hallway, rooms)
         }

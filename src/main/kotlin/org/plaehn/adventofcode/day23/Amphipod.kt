@@ -4,11 +4,7 @@ import java.util.*
 
 class Amphipod(private val initialBurrow: Burrow) {
 
-    fun solvePart1() = computeLeastEnergyToOrganizeAmphipods(initialBurrow)
-
-    fun solvePart2() = computeLeastEnergyToOrganizeAmphipods(initialBurrow)
-
-    private fun computeLeastEnergyToOrganizeAmphipods(initialBurrow: Burrow): Int {
+    fun computeLeastEnergyToOrganizeAmphipods(): Int {
         val candidates = PriorityQueue<BurrowWithCost>().apply { add(BurrowWithCost(initialBurrow, 0)) }
         val visited = mutableSetOf<BurrowWithCost>()
         val currentCosts = mutableMapOf<Burrow, Int>().withDefault { Int.MAX_VALUE }
@@ -31,8 +27,7 @@ class Amphipod(private val initialBurrow: Burrow) {
     }
 
     companion object {
-        fun fromInputLines(inputList: List<String>) =
-            Amphipod(Burrow.fromInputLines(inputList))
+        fun fromInputLines(inputList: List<String>) = Amphipod(Burrow.fromInputLines(inputList))
     }
 }
 

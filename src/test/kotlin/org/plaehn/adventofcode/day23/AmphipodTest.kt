@@ -12,7 +12,7 @@ internal class AmphipodTest {
         val inputLines = this::class.java.readLines("test_input.txt")
 
         val amphipod = Amphipod.fromInputLines(inputLines)
-        val energy = amphipod.solvePart1()
+        val energy = amphipod.computeLeastEnergyToOrganizeAmphipods()
 
         assertThat(energy).isEqualTo(12521)
     }
@@ -22,7 +22,7 @@ internal class AmphipodTest {
         val inputLines = this::class.java.readLines("puzzle_input.txt")
 
         val amphipod = Amphipod.fromInputLines(inputLines)
-        val energy = amphipod.solvePart1()
+        val energy = amphipod.computeLeastEnergyToOrganizeAmphipods()
 
         assertThat(energy).isEqualTo(18051)
     }
@@ -31,8 +31,9 @@ internal class AmphipodTest {
     fun `Solve part 2 for test input`() {
         val inputLines = this::class.java.readLines("test_input.txt")
 
-        val amphipod = Amphipod.fromInputLines(inputLines)
-        val energy = amphipod.solvePart2()
+        val expandedLines = inputLines.take(3) + listOf("  #D#C#B#A#  ", "  #D#B#A#C#  ") + inputLines.drop(3)
+        val amphipod = Amphipod.fromInputLines(expandedLines)
+        val energy = amphipod.computeLeastEnergyToOrganizeAmphipods()
 
         assertThat(energy).isEqualTo(44169)
     }
@@ -41,9 +42,10 @@ internal class AmphipodTest {
     fun `Solve part 2 for puzzle input`() {
         val inputLines = this::class.java.readLines("puzzle_input.txt")
 
-        val amphipod = Amphipod.fromInputLines(inputLines)
-        val energy = amphipod.solvePart2()
+        val expandedLines = inputLines.take(3) + listOf("  #D#C#B#A#  ", "  #D#B#A#C#  ") + inputLines.drop(3)
+        val amphipod = Amphipod.fromInputLines(expandedLines)
+        val energy = amphipod.computeLeastEnergyToOrganizeAmphipods()
 
-        assertThat(energy).isEqualTo(18051)
+        assertThat(energy).isEqualTo(50245)
     }
 }
