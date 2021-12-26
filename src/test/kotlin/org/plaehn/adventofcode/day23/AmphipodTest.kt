@@ -24,7 +24,7 @@ internal class AmphipodTest {
         val amphipod = Amphipod.fromInputLines(inputLines)
         val energy = amphipod.computeLeastEnergyToOrganizeAmphipods()
 
-        assertThat(energy).isEqualTo(12521)
+        assertThat(energy).isEqualTo(18051)
     }
 
 }

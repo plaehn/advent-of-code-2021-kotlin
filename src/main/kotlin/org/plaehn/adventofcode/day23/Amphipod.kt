@@ -1,25 +1,32 @@
 package org.plaehn.adventofcode.day23
 
+import java.util.*
 import kotlin.math.absoluteValue
 
 class Amphipod(private val initialBurrow: Burrow) {
 
-    private val seenBurrows = mutableSetOf<Burrow>()
+    fun computeLeastEnergyToOrganizeAmphipods() = findAllCosts(initialBurrow)
 
-    fun computeLeastEnergyToOrganizeAmphipods(): Int {
-        val all = findSolutions(SolveStep(initialBurrow))
-        val cheapest: SolveStep = all.minByOrNull { it.cost }!!
-        return cheapest.cost
-    }
+    private fun findAllCosts(initialBurrow: Burrow): Int {
+        val candidates = PriorityQueue<BurrowWithCost>().apply { add(BurrowWithCost(initialBurrow, 0)) }
+        val visited = mutableSetOf<BurrowWithCost>()
+        val currentCosts = mutableMapOf<Burrow, Int>().withDefault { Int.MAX_VALUE }
 
-    private fun findSolutions(step: SolveStep): List<SolveStep> {
-        if (step.isSolution()) return listOf(step)
-
-        val isNew = seenBurrows.add(step.burrow)
-        if (!isNew) return emptyList()
-
-        val nextSteps = step.enumerateLegalMoves()
-        return nextSteps.map { findSolutions(it) }.flatten()
+        while (candidates.isNotEmpty()) {
+            val current = candidates.poll()
+            visited.add(current)
+            current.burrow
+                .enumerateLegalMoves()
+                .filter { !visited.contains(it) }
+                .forEach { next ->
+                    val newCost = current.cost + next.cost
+                    if (newCost < currentCosts.getValue(next.burrow)) {
+                        currentCosts[next.burrow] = newCost
+                        candidates.add(BurrowWithCost(next.burrow, newCost))
+                    }
+                }
+        }
+        return currentCosts.entries.first { it.key.isSolution() }.value
     }
 
     companion object {
@@ -37,98 +44,9 @@ class Amphipod(private val initialBurrow: Burrow) {
     }
 }
 
-data class SolveStep(val burrow: Burrow, val cost: Int = 0, val previousStep: SolveStep? = null) {
+data class BurrowWithCost(val burrow: Burrow, val cost: Int) : Comparable<BurrowWithCost> {
 
-    fun enumerateLegalMoves(): List<SolveStep> {
-        val allMoves = mutableListOf<SolveStep>()
-        allMoves.addAll(movesFromHallwayIntoRoom())
-        allMoves.addAll(movesFromRoomIntoRoom())
-        allMoves.addAll(movesFromRoomIntoHallway())
-        return allMoves
-    }
-
-    private fun movesFromRoomIntoHallway() =
-        sequence {
-            burrow.rooms.forEachIndexed { roomIndex, room ->
-                if (room.isNotEmpty() && room.canRemoveTopmostAmphipod(roomIndex)) {
-                    val (amphipod, indexInRoom) = room.topmostNonEmptyWithIndex()
-                    val hallwayIndexAboveRoom = computeHallwayIndexAboveRoom(roomIndex)
-                    burrow.hallway.findEmptySpotsReachableFrom(hallwayIndexAboveRoom).forEach { hallwayIndex ->
-                        val newBurrow = Burrow(
-                            burrow.hallway.replace(hallwayIndex, amphipod),
-                            burrow.rooms.replace(roomIndex, indexInRoom, '.')
-                        )
-                        val numberOfSteps = (hallwayIndexAboveRoom - hallwayIndex).absoluteValue + indexInRoom + 1
-                        val costOfMove = numberOfSteps * amphipod.costOfOneStep()
-                        yield(SolveStep(newBurrow, cost + costOfMove, this@SolveStep))
-                    }
-                }
-            }
-        }.toList()
-
-    private fun movesFromHallwayIntoRoom(): Collection<SolveStep> {
-        return sequence {
-            burrow.hallway.spots.forEachIndexed { hallwayIndex, ch ->
-                if (ch.isAmphipod()) {
-                    burrow.rooms.forEachIndexed { roomIndex, room ->
-                        val indexInRoom = room.hasRoomForAtIndex(ch, roomIndex)
-                        val hallwayIndexAboveRoom = computeHallwayIndexAboveRoom(roomIndex)
-                        if (indexInRoom != null && isReachable(hallwayIndex, hallwayIndexAboveRoom)) {
-                            val newBurrow = Burrow(
-                                burrow.hallway.replace(hallwayIndex, '.'),
-                                burrow.rooms.replace(roomIndex, indexInRoom, ch)
-                            )
-                            val numberOfSteps = (hallwayIndexAboveRoom - hallwayIndex).absoluteValue + indexInRoom + 1
-                            val costOfMove = numberOfSteps * ch.costOfOneStep()
-                            yield(SolveStep(newBurrow, cost + costOfMove, this@SolveStep))
-                        }
-                    }
-                }
-            }
-        }.toList()
-    }
-
-    private fun movesFromRoomIntoRoom(): Collection<SolveStep> {
-        return sequence {
-            burrow.rooms.forEachIndexed { startRoomIndex, startRoom ->
-                if (startRoom.isNotEmpty()) {
-                    burrow.rooms.forEachIndexed { endRoomIndex, endRoom ->
-                        if (startRoom != endRoom && startRoom.canRemoveTopmostAmphipod(endRoomIndex)) {
-                            val (amphipod, indexInStartRoom) = startRoom.topmostNonEmptyWithIndex()
-                            val hallwayIndexAboveStart = computeHallwayIndexAboveRoom(startRoomIndex)
-                            val hallwayIndexAboveEnd = computeHallwayIndexAboveRoom(endRoomIndex)
-                            val indexInEndRoom = endRoom.hasRoomForAtIndex(amphipod, endRoomIndex)
-                            if (isReachable(hallwayIndexAboveStart, hallwayIndexAboveEnd) && indexInEndRoom != null) {
-                                val newBurrow = Burrow(
-                                    burrow.hallway,
-                                    burrow.rooms
-                                        .replace(startRoomIndex, indexInStartRoom, '.')
-                                        .replace(endRoomIndex, indexInEndRoom, amphipod)
-                                )
-                                val numberOfSteps = (hallwayIndexAboveStart - hallwayIndexAboveEnd).absoluteValue +
-                                        indexInStartRoom + indexInEndRoom + 2
-                                val costOfMove = numberOfSteps * amphipod.costOfOneStep()
-                                yield(SolveStep(newBurrow, cost + costOfMove, this@SolveStep))
-                            }
-                        }
-                    }
-                }
-            }
-        }.toList()
-    }
-
-    private fun computeHallwayIndexAboveRoom(roomIndex: Int) = 2 * roomIndex + 2
-
-    private fun isReachable(hallwayIndex: Int, hallwayIndexAboveRoom: Int) =
-        if (hallwayIndex < hallwayIndexAboveRoom) {
-            (hallwayIndex + 1 until hallwayIndexAboveRoom).all { this.burrow.hallway.spots[it].isOpenSpace() }
-        } else {
-            (hallwayIndexAboveRoom + 1 until hallwayIndex).all { this.burrow.hallway.spots[it].isOpenSpace() }
-        }
-
-    fun isSolution() = burrow.rooms.map { "${it.upper}${it.lower}" } == listOf("AA", "BB", "CC", "DD")
-
-    override fun toString() = "$burrow\nCost: $cost\n--------\n"
+    override fun compareTo(other: BurrowWithCost) = cost.compareTo(other.cost)
 }
 
 private fun Char.costOfOneStep() =
@@ -150,6 +68,95 @@ private fun List<Room>.replace(roomIndex: Int, indexInRoom: Int, newChar: Char) 
     }
 
 data class Burrow(val hallway: Hallway, val rooms: List<Room>) {
+
+    fun enumerateLegalMoves(): List<BurrowWithCost> {
+        val allMoves = mutableListOf<BurrowWithCost>()
+        allMoves.addAll(movesFromHallwayIntoRoom())
+        allMoves.addAll(movesFromRoomIntoRoom())
+        allMoves.addAll(movesFromRoomIntoHallway())
+        return allMoves
+    }
+
+    private fun movesFromRoomIntoHallway() =
+        sequence {
+            rooms.forEachIndexed { roomIndex, room ->
+                if (room.isNotEmpty() && room.canRemoveTopmostAmphipod(roomIndex)) {
+                    val (amphipod, indexInRoom) = room.topmostNonEmptyWithIndex()
+                    val hallwayIndexAboveRoom = computeHallwayIndexAboveRoom(roomIndex)
+                    hallway.findEmptySpotsReachableFrom(hallwayIndexAboveRoom).forEach { hallwayIndex ->
+                        val newBurrow = Burrow(
+                            hallway.replace(hallwayIndex, amphipod),
+                            rooms.replace(roomIndex, indexInRoom, '.')
+                        )
+                        val numberOfSteps = (hallwayIndexAboveRoom - hallwayIndex).absoluteValue + indexInRoom + 1
+                        val costOfMove = numberOfSteps * amphipod.costOfOneStep()
+                        yield(BurrowWithCost(newBurrow, costOfMove))
+                    }
+                }
+            }
+        }.toList()
+
+    private fun movesFromHallwayIntoRoom(): Collection<BurrowWithCost> {
+        return sequence {
+            hallway.spots.forEachIndexed { hallwayIndex, ch ->
+                if (ch.isAmphipod()) {
+                    rooms.forEachIndexed { roomIndex, room ->
+                        val indexInRoom = room.hasRoomForAtIndex(ch, roomIndex)
+                        val hallwayIndexAboveRoom = computeHallwayIndexAboveRoom(roomIndex)
+                        if (indexInRoom != null && isReachable(hallwayIndex, hallwayIndexAboveRoom)) {
+                            val newBurrow = Burrow(
+                                hallway.replace(hallwayIndex, '.'),
+                                rooms.replace(roomIndex, indexInRoom, ch)
+                            )
+                            val numberOfSteps = (hallwayIndexAboveRoom - hallwayIndex).absoluteValue + indexInRoom + 1
+                            val costOfMove = numberOfSteps * ch.costOfOneStep()
+                            yield(BurrowWithCost(newBurrow, costOfMove))
+                        }
+                    }
+                }
+            }
+        }.toList()
+    }
+
+    private fun movesFromRoomIntoRoom(): Collection<BurrowWithCost> {
+        return sequence {
+            rooms.forEachIndexed { startRoomIndex, startRoom ->
+                if (startRoom.isNotEmpty()) {
+                    rooms.forEachIndexed { endRoomIndex, endRoom ->
+                        if (startRoom != endRoom && startRoom.canRemoveTopmostAmphipod(endRoomIndex)) {
+                            val (amphipod, indexInStartRoom) = startRoom.topmostNonEmptyWithIndex()
+                            val hallwayIndexAboveStart = computeHallwayIndexAboveRoom(startRoomIndex)
+                            val hallwayIndexAboveEnd = computeHallwayIndexAboveRoom(endRoomIndex)
+                            val indexInEndRoom = endRoom.hasRoomForAtIndex(amphipod, endRoomIndex)
+                            if (isReachable(hallwayIndexAboveStart, hallwayIndexAboveEnd) && indexInEndRoom != null) {
+                                val newBurrow = Burrow(
+                                    hallway,
+                                    rooms
+                                        .replace(startRoomIndex, indexInStartRoom, '.')
+                                        .replace(endRoomIndex, indexInEndRoom, amphipod)
+                                )
+                                val numberOfSteps = (hallwayIndexAboveStart - hallwayIndexAboveEnd).absoluteValue +
+                                        indexInStartRoom + indexInEndRoom + 2
+                                val costOfMove = numberOfSteps * amphipod.costOfOneStep()
+                                yield(BurrowWithCost(newBurrow, costOfMove))
+                            }
+                        }
+                    }
+                }
+            }
+        }.toList()
+    }
+
+    private fun computeHallwayIndexAboveRoom(roomIndex: Int) = 2 * roomIndex + 2
+
+    private fun isReachable(hallwayIndex: Int, hallwayIndexAboveRoom: Int) =
+        if (hallwayIndex < hallwayIndexAboveRoom) {
+            (hallwayIndex + 1 until hallwayIndexAboveRoom).all { this.hallway.spots[it].isOpenSpace() }
+        } else {
+            (hallwayIndexAboveRoom + 1 until hallwayIndex).all { this.hallway.spots[it].isOpenSpace() }
+        }
+
+    fun isSolution() = rooms.map { "${it.upper}${it.lower}" } == listOf("AA", "BB", "CC", "DD")
 
     override fun toString(): String {
         var str = '#'.repeat(hallway.size + 2) + '\n'
