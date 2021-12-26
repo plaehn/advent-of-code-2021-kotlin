@@ -4,53 +4,22 @@ import kotlin.math.absoluteValue
 
 class Amphipod(private val initialBurrow: Burrow) {
 
-    private val almostThere = Burrow(
-        Hallway(listOf('.', '.', '.', 'B', '.', '.', '.', '.', '.', '.', '.')),
-        listOf(
-            Room('B', 'A'), Room('C', 'D'), Room('.', 'C'), Room('D', 'A')
-        )
-    )
     private val seenBurrows = mutableSetOf<Burrow>()
-    private var depth = 0
 
     fun computeLeastEnergyToOrganizeAmphipods(): Int {
         val all = findSolutions(SolveStep(initialBurrow))
-        println("Number of solutions: ${all.size}") // 26
-        println("=================")
-        println("=== Solutions ===")
-        println("=================")
-        var i = 1
-        all.map {
-            println()
-            println("Solution $i")
-            ++i
-            it.allSteps().forEach { println(it) }
-            println(it.allSteps().first())
-        }
         val cheapest: SolveStep = all.minByOrNull { it.cost }!!
         return cheapest.cost
     }
 
-    // TODO prune by cheapest cost
     private fun findSolutions(step: SolveStep): List<SolveStep> {
-        ++depth
-        println("Depth: $depth")
-        println("Current:")
-        println(step.burrow)
-        //  println("-----------")
-        //if (step.burrow == almostThere) {
-        //    println("Almost there...")
-        //}
+        if (step.isSolution()) return listOf(step)
+
         val isNew = seenBurrows.add(step.burrow)
         if (!isNew) return emptyList()
+
         val nextSteps = step.enumerateLegalMoves()
-        // XXX sort by cost
-        return nextSteps.map { nextStep ->
-            when {
-                nextStep.isSolution() -> listOf(nextStep)
-                else -> findSolutions(nextStep)
-            }
-        }.flatten().also { depth-- }
+        return nextSteps.map { findSolutions(it) }.flatten()
     }
 
     companion object {
@@ -72,18 +41,9 @@ data class SolveStep(val burrow: Burrow, val cost: Int = 0, val previousStep: So
 
     fun enumerateLegalMoves(): List<SolveStep> {
         val allMoves = mutableListOf<SolveStep>()
-        println("Room -> Hallway")
-        println("---------------")
-        allMoves.addAll(movesFromRoomIntoHallway())
-
-        println("Hallway -> Room")
-        println("---------------")
         allMoves.addAll(movesFromHallwayIntoRoom())
-
-        println("Room -> Room")
-        println("------------")
         allMoves.addAll(movesFromRoomIntoRoom())
-
+        allMoves.addAll(movesFromRoomIntoHallway())
         return allMoves
     }
 
@@ -100,8 +60,6 @@ data class SolveStep(val burrow: Burrow, val cost: Int = 0, val previousStep: So
                         )
                         val numberOfSteps = (hallwayIndexAboveRoom - hallwayIndex).absoluteValue + indexInRoom + 1
                         val costOfMove = numberOfSteps * amphipod.costOfOneStep()
-                        println(newBurrow)
-                        println("=======")
                         yield(SolveStep(newBurrow, cost + costOfMove, this@SolveStep))
                     }
                 }
@@ -122,9 +80,6 @@ data class SolveStep(val burrow: Burrow, val cost: Int = 0, val previousStep: So
                             )
                             val numberOfSteps = (hallwayIndexAboveRoom - hallwayIndex).absoluteValue + indexInRoom + 1
                             val costOfMove = numberOfSteps * ch.costOfOneStep()
-                            println(newBurrow)
-                            println(costOfMove)
-                            println("=======")
                             yield(SolveStep(newBurrow, cost + costOfMove, this@SolveStep))
                         }
                     }
@@ -153,9 +108,6 @@ data class SolveStep(val burrow: Burrow, val cost: Int = 0, val previousStep: So
                                 val numberOfSteps = (hallwayIndexAboveStart - hallwayIndexAboveEnd).absoluteValue +
                                         indexInStartRoom + indexInEndRoom + 2
                                 val costOfMove = numberOfSteps * amphipod.costOfOneStep()
-                                println(newBurrow)
-                                println(costOfMove)
-                                println("=======")
                                 yield(SolveStep(newBurrow, cost + costOfMove, this@SolveStep))
                             }
                         }
@@ -175,13 +127,6 @@ data class SolveStep(val burrow: Burrow, val cost: Int = 0, val previousStep: So
         }
 
     fun isSolution() = burrow.rooms.map { "${it.upper}${it.lower}" } == listOf("AA", "BB", "CC", "DD")
-
-    fun allSteps(): List<SolveStep> =
-        if (previousStep == null) {
-            emptyList()
-        } else {
-            previousStep.allSteps() + this
-        }
 
     override fun toString() = "$burrow\nCost: $cost\n--------\n"
 }

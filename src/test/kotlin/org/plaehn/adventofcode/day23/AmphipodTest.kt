@@ -17,4 +17,14 @@ internal class AmphipodTest {
         assertThat(energy).isEqualTo(12521)
     }
 
+    @Test
+    fun `Compute number of cubes that are on after reboot for puzzle input`() {
+        val inputLines = this::class.java.readLines("puzzle_input.txt")
+
+        val amphipod = Amphipod.fromInputLines(inputLines)
+        val energy = amphipod.computeLeastEnergyToOrganizeAmphipods()
+
+        assertThat(energy).isEqualTo(12521)
+    }
+
 }
