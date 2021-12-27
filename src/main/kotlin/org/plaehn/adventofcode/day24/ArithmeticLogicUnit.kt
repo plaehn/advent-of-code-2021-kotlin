@@ -1,60 +1,66 @@
 package org.plaehn.adventofcode.day24
 
-import kotlin.streams.toList
+import java.time.LocalDateTime
 
-class ArithmeticLogicUnit(private val instructions: List<Instruction>) {
+class ArithmeticLogicUnit(instructions: List<Instruction>) {
 
-    // group instructions into blocks starting with "inp"
-    // keep cache mapping number of processed "inp" group with input list prefix of same length
+    private val instructionBlocks: List<List<Instruction>> = groupByInp(instructions)
 
-    fun computeLargestAcceptedModelNumber(): Long {
-        var count = 0
-        return modelNumbers().first {
-            val result = execute(it.toMutableList())
-            count++
-            if (count % 10000 == 0) println(count)
-            result['z'] == 0L
-        }.toLong()
+    private fun groupByInp(instructions: List<Instruction>) =
+        sequence {
+            val group = mutableListOf<Instruction>()
+            instructions.forEach { instr ->
+                if (instr.operator == "inp" && group.isNotEmpty()) {
+                    yield(group.toList())
+                    group.clear()
+                }
+                group.add(instr)
+            }
+            yield(group)
+        }.toList()
+
+    fun computeLargestAcceptedModelNumber() =
+        traverse(emptyList(), Alu()) ?: error("No model number found")
+
+    private fun traverse(modelNumber: List<Int>, alu: Alu): Long? {
+        if (modelNumber.size == 14) {
+            return if (alu['z'] == 0L) modelNumber.toLong() else null
+        }
+        if (modelNumber.size == 1) println(LocalDateTime.now().toString() + ": " + modelNumber.first())
+        return (9 downTo 1).firstNotNullOfOrNull { digit ->
+            val resultAlu = execute(instructionBlocks[modelNumber.size], alu, digit)
+            traverse(modelNumber + digit, resultAlu)
+        }
     }
 
-    private fun modelNumbers() =
-        generateSequence(99999999999999) { it - 1 }
-            .map { it.toDigitList() }
-            .filter { !it.contains(0) }
-
-    private fun List<Int>.toLong() =
-        fold(0L) { acc, elem -> acc * 10 + elem }
-
-
-    private fun Long.toDigitList() =
-        toString().chars().map { it - '0'.code }.toList()
-
-    internal fun execute(
-        input: MutableList<Int>
+    private fun execute(
+        instructions: List<Instruction>,
+        inputAlu: Alu,
+        nextDigit: Int
     ) =
-        instructions.foldIndexed(Alu()) { index, alu, instr ->
+        instructions.fold(inputAlu) { alu, instr ->
 
-            val rhs = if (instr.rhs != null) {
-                if (instr.rhs.first().isLetter()) {
-                    alu[instr.rhs.first()]
-                } else {
-                    instr.rhs.toLong()
-                }
+            val rhs = if (instr.rhsIsVariable()) {
+                alu[instr.rhsAsVariable()]
             } else {
-                null
+                instr.rhsAsNumber()
             }
+
             val value = when (instr.operator) {
-                "inp" -> input.removeFirst().toLong()
-                "add" -> alu[instr.variable] + rhs!!
-                "mul" -> alu[instr.variable] * rhs!!
-                "div" -> alu[instr.variable] / rhs!!
-                "mod" -> alu[instr.variable] % rhs!!
+                "inp" -> nextDigit.toLong()
+                "add" -> alu[instr.variable] + rhs
+                "mul" -> alu[instr.variable] * rhs
+                "div" -> alu[instr.variable] / rhs
+                "mod" -> alu[instr.variable] % rhs
                 "eql" -> if (alu[instr.variable] == rhs) 1 else 0
                 else -> error("Unknown operand ${instr.operator}")
             }
             val newAlu = alu.set(instr.variable, value)
             newAlu
         }
+
+    private fun List<Int>.toLong() =
+        fold(0L) { acc, elem -> acc * 10 + elem }
 
     companion object {
         fun fromInputLines(inputList: List<String>) =
@@ -63,6 +69,12 @@ class ArithmeticLogicUnit(private val instructions: List<Instruction>) {
 }
 
 data class Instruction(val operator: String, val variable: Char, val rhs: String?) {
+
+    fun rhsIsVariable() = rhs != null && rhs.first().isLetter()
+    fun rhsAsVariable() = rhs!!.first()
+    fun rhsAsNumber() = rhs?.toLong() ?: -1
+
+    override fun toString() = (operator + " " + variable + " " + rhs.orEmpty()).trim()
 
     companion object {
         fun fromInputString(input: String) =
