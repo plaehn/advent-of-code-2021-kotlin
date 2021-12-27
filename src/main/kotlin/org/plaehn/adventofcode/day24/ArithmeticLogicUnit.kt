@@ -2,16 +2,15 @@ package org.plaehn.adventofcode.day24
 
 import kotlin.streams.toList
 
-class ArithmeticLogicUnit(private val instructions: List<String>) {
+class ArithmeticLogicUnit(private val instructions: List<Instruction>) {
 
     // group instructions into blocks starting with "inp"
     // keep cache mapping number of processed "inp" group with input list prefix of same length
 
     fun computeLargestAcceptedModelNumber(): Long {
-        val cache = mutableMapOf<CacheKey, Alu>()
         var count = 0
         return modelNumbers().first {
-            val result = execute(it.toMutableList(), cache)
+            val result = execute(it.toMutableList())
             count++
             if (count % 10000 == 0) println(count)
             result['z'] == 0L
@@ -31,41 +30,45 @@ class ArithmeticLogicUnit(private val instructions: List<String>) {
         toString().chars().map { it - '0'.code }.toList()
 
     internal fun execute(
-        input: MutableList<Int>,
-        cache: MutableMap<CacheKey, Alu> = mutableMapOf()
+        input: MutableList<Int>
     ) =
         instructions.foldIndexed(Alu()) { index, alu, instr ->
-//            if (cache.containsKey(CacheKey(index, alu, input))) {
-//                println("cache hit")
-//                return cache[CacheKey(index, alu, input)]!!
-//            }
 
-            val parts = instr.split(" ")
-            val op = parts[0]
-            val variable = parts[1].first()
-            val rhsStr = parts.getOrNull(2) ?: "1"
-            val rhs = if (rhsStr.first().isLetter()) alu[rhsStr.first()] else rhsStr.toLong()
-            val value = when (op) {
-                "inp" -> input.removeFirst().toLong()
-                "add" -> alu[variable] + rhs
-                "mul" -> alu[variable] * rhs
-                "div" -> alu[variable] / rhs
-                "mod" -> alu[variable] % rhs
-                "eql" -> if (alu[variable] == rhs) 1 else 0
-                else -> error("Unknown operand $op")
+            val rhs = if (instr.rhs != null) {
+                if (instr.rhs.first().isLetter()) {
+                    alu[instr.rhs.first()]
+                } else {
+                    instr.rhs.toLong()
+                }
+            } else {
+                null
             }
-            val newAlu = alu.set(variable, value)
-            // cache[CacheKey(index, alu, input)] = newAlu
-            // println(instr.padEnd(12) + newAlu)
+            val value = when (instr.operator) {
+                "inp" -> input.removeFirst().toLong()
+                "add" -> alu[instr.variable] + rhs!!
+                "mul" -> alu[instr.variable] * rhs!!
+                "div" -> alu[instr.variable] / rhs!!
+                "mod" -> alu[instr.variable] % rhs!!
+                "eql" -> if (alu[instr.variable] == rhs) 1 else 0
+                else -> error("Unknown operand ${instr.operator}")
+            }
+            val newAlu = alu.set(instr.variable, value)
             newAlu
         }
 
     companion object {
-        fun fromInputLines(inputList: List<String>) = ArithmeticLogicUnit(inputList)
+        fun fromInputLines(inputList: List<String>) =
+            ArithmeticLogicUnit(inputList.map { Instruction.fromInputString(it) })
     }
 }
 
-data class CacheKey(val instructionNumber: Int, val alu: Alu, val remainingInput: List<Int>)
+data class Instruction(val operator: String, val variable: Char, val rhs: String?) {
+
+    companion object {
+        fun fromInputString(input: String) =
+            input.split(" ").let { Instruction(it[0], it[1].first(), it.getOrNull(2)) }
+    }
+}
 
 data class Alu(private val variables: Map<Char, Long> = mapOf('x' to 0, 'y' to 0, 'z' to 0, 'w' to 0)) {
 
