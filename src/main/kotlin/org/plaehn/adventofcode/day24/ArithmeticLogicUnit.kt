@@ -1,91 +1,38 @@
 package org.plaehn.adventofcode.day24
 
-import java.time.LocalDateTime
+class ArithmeticLogicUnit(instructions: List<String>) {
 
-class ArithmeticLogicUnit(instructions: List<Instruction>) {
-
-    private val instructionBlocks: List<List<Instruction>> = groupByInp(instructions)
-
-    private fun groupByInp(instructions: List<Instruction>) =
-        sequence {
-            val group = mutableListOf<Instruction>()
-            instructions.forEach { instr ->
-                if (instr.operator == "inp" && group.isNotEmpty()) {
-                    yield(group.toList())
-                    group.clear()
-                }
-                group.add(instr)
-            }
-            yield(group)
-        }.toList()
-
-    fun computeLargestAcceptedModelNumber() =
-        traverse(emptyList(), Alu()) ?: error("No model number found")
-
-    private fun traverse(modelNumber: List<Int>, alu: Alu): Long? {
-        if (modelNumber.size == 14) {
-            return if (alu['z'] == 0L) modelNumber.toLong() else null
-        }
-        if (modelNumber.size == 1) println(LocalDateTime.now().toString() + ": " + modelNumber.first())
-        return (9 downTo 1).firstNotNullOfOrNull { digit ->
-            val resultAlu = execute(instructionBlocks[modelNumber.size], alu, digit)
-            traverse(modelNumber + digit, resultAlu)
-        }
+    private val parameters = instructions.chunked(18).map { line ->
+        Parameters(
+            line[5].substringAfterLast(" ").toInt(),
+            line[15].substringAfterLast(" ").toInt()
+        )
     }
 
-    private fun execute(
-        instructions: List<Instruction>,
-        inputAlu: Alu,
-        nextDigit: Int
-    ) =
-        instructions.fold(inputAlu) { alu, instr ->
+    fun solvePart1() = findModelNumber(largest = true)
 
-            val rhs = if (instr.rhsIsVariable()) {
-                alu[instr.rhsAsVariable()]
+    fun solvePart2() = findModelNumber(largest = false)
+
+    private fun findModelNumber(largest: Boolean): Long {
+        val stack = ArrayDeque<StackItem>()
+        val digits = Array(14) { 0 }
+
+        parameters.forEachIndexed { digitIndex, parameters ->
+            if (parameters.xAddend >= 10) {
+                stack.add(StackItem(digitIndex, parameters.yAddend))
             } else {
-                instr.rhsAsNumber()
+                val popped = stack.removeLast()
+                val addend = popped.addend + parameters.xAddend
+                val digit = (if (largest) 9 downTo 1 else 1..9).first { it + addend in 1..9 }
+                digits[popped.digitIndex] = digit
+                digits[digitIndex] = digit + addend
             }
-
-            val value = when (instr.operator) {
-                "inp" -> nextDigit.toLong()
-                "add" -> alu[instr.variable] + rhs
-                "mul" -> alu[instr.variable] * rhs
-                "div" -> alu[instr.variable] / rhs
-                "mod" -> alu[instr.variable] % rhs
-                "eql" -> if (alu[instr.variable] == rhs) 1 else 0
-                else -> error("Unknown operand ${instr.operator}")
-            }
-            val newAlu = alu.set(instr.variable, value)
-            newAlu
         }
 
-    private fun List<Int>.toLong() =
-        fold(0L) { acc, elem -> acc * 10 + elem }
-
-    companion object {
-        fun fromInputLines(inputList: List<String>) =
-            ArithmeticLogicUnit(inputList.map { Instruction.fromInputString(it) })
+        return digits.fold(0L) { acc, d -> acc * 10 + d }
     }
-}
 
-data class Instruction(val operator: String, val variable: Char, val rhs: String?) {
+    private class StackItem(val digitIndex: Int, val addend: Int)
 
-    fun rhsIsVariable() = rhs != null && rhs.first().isLetter()
-    fun rhsAsVariable() = rhs!!.first()
-    fun rhsAsNumber() = rhs?.toLong() ?: -1
-
-    override fun toString() = (operator + " " + variable + " " + rhs.orEmpty()).trim()
-
-    companion object {
-        fun fromInputString(input: String) =
-            input.split(" ").let { Instruction(it[0], it[1].first(), it.getOrNull(2)) }
-    }
-}
-
-data class Alu(private val variables: Map<Char, Long> = mapOf('x' to 0, 'y' to 0, 'z' to 0, 'w' to 0)) {
-
-    fun set(variable: Char, value: Long) =
-        Alu(variables.toMutableMap().apply { this[variable] = value })
-
-    operator fun get(op: Char) = variables[op]!!
+    private class Parameters(val xAddend: Int, val yAddend: Int)
 }

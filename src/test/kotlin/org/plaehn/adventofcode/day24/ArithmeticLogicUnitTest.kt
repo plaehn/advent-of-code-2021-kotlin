@@ -11,9 +11,19 @@ internal class ArithmeticLogicUnitTest {
     fun `Compute largest model number for puzzle input`() {
         val inputLines = this::class.java.readLines("puzzle_input.txt")
 
-        val alu = ArithmeticLogicUnit.fromInputLines(inputLines)
-        val largestModelNumber = alu.computeLargestAcceptedModelNumber()
+        val alu = ArithmeticLogicUnit(inputLines)
+        val largestModelNumber = alu.solvePart1()
 
-        assertThat(largestModelNumber).isEqualTo(12345)
+        assertThat(largestModelNumber).isEqualTo(29599469991739)
+    }
+
+    @Test
+    fun `Compute smallest model number for puzzle input`() {
+        val inputLines = this::class.java.readLines("puzzle_input.txt")
+
+        val alu = ArithmeticLogicUnit(inputLines)
+        val largestModelNumber = alu.solvePart2()
+
+        assertThat(largestModelNumber).isEqualTo(17153114691118)
     }
 }
