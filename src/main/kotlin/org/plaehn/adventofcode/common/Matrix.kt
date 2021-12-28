@@ -65,16 +65,24 @@ data class Matrix<T>(
         return Matrix(transposed, defaultValue)
     }
 
-    override fun toString(): String {
-        val maxLength = 2 + values().maxOf { it.toString().length }
-        return matrix.joinToString(separator = "\n") { row ->
+    override fun toString() = toString(0)
+
+    fun toString(pad: Int = 0) =
+        matrix.joinToString(separator = "\n") { row ->
             row.joinToString(separator = "") {
-                it.toString().padStart(maxLength)
+                it.toString().padStart(pad)
             }
         }
-    }
 
     companion object {
+
+        fun <T> fromMap(map: Map<Coord, T>, width: Int, height: Int, defaultValue: T): Matrix<T> {
+            val matrix = Matrix(MutableList(height) { MutableList(width) { defaultValue } }, defaultValue)
+            map.forEach { (coord, value) ->
+                matrix[coord] = value
+            }
+            return matrix
+        }
 
         fun <T> fromDimensions(width: Int, height: Int, defaultValue: T) =
             Matrix(MutableList(height) { MutableList(width) { defaultValue } }, defaultValue)
