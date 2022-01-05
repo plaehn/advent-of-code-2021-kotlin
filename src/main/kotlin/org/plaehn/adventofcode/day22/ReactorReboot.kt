@@ -6,7 +6,7 @@ class ReactorReboot(private val rebootSteps: List<RebootStep>) {
 
     private val cubesThatAreOn: MutableSet<Coord> = mutableSetOf()
 
-    fun computeNumberOfCubesThatAreOnAfterReboot(): Int {
+    fun computeNumberOfCubesThatAreOnAfterReboot(): Long {
         rebootSteps.forEach { rebootStep ->
             rebootStep.cuboid.forEach { coord ->
                 if (rebootStep.on) {
@@ -16,11 +16,11 @@ class ReactorReboot(private val rebootSteps: List<RebootStep>) {
                 }
             }
         }
-        return cubesThatAreOn.size
+        return cubesThatAreOn.size.toLong()
     }
 
     companion object {
-        fun fromInputLines(inputList: List<String>, limit: IntRange) =
+        fun fromInputLines(inputList: List<String>, limit: IntRange? = null) =
             ReactorReboot(inputList
                               .map { RebootStep.fromInputLine(it) }
                               .filter { it.cuboid.isWithin(limit) }
@@ -53,8 +53,8 @@ data class Cuboid(val from: Coord, val to: Coord) {
     fun contains(coord: Coord) =
         coord.x in from.x..to.x && coord.y in from.y..to.y && coord.z in from.z..to.z
 
-    fun isWithin(limit: IntRange) =
-        limit.contains(from.x) && limit.contains(from.y) && limit.contains(from.z) &&
+    fun isWithin(limit: IntRange?) =
+        limit != null && limit.contains(from.x) && limit.contains(from.y) && limit.contains(from.z) &&
                 limit.contains(to.x) && limit.contains(to.y) && limit.contains(to.z)
 
     companion object {
