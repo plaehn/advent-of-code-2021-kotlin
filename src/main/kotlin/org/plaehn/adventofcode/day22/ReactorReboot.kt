@@ -1,73 +1,58 @@
 package org.plaehn.adventofcode.day22
 
-import org.plaehn.adventofcode.common.Coord
-
-class ReactorReboot(private val rebootSteps: List<RebootStep>) {
-
-    private val cubesThatAreOn: MutableSet<Coord> = mutableSetOf()
+class ReactorReboot(private val cuboids: List<Cuboid>) {
 
     fun computeNumberOfCubesThatAreOnAfterReboot(): Long {
-        rebootSteps.forEach { rebootStep ->
-            rebootStep.cuboid.forEach { coord ->
-                if (rebootStep.on) {
-                    cubesThatAreOn.add(coord)
-                } else {
-                    cubesThatAreOn.remove(coord)
-                }
-            }
+        val volumes = mutableListOf<Cuboid>()
+        cuboids.forEach { cuboid ->
+            volumes.addAll(volumes.mapNotNull { it intersect cuboid })
+            if (cuboid.on) volumes.add(cuboid)
         }
-        return cubesThatAreOn.size.toLong()
+        return volumes.sumOf { it.volume() }
     }
 
     companion object {
         fun fromInputLines(inputList: List<String>, limit: IntRange? = null) =
             ReactorReboot(inputList
-                              .map { RebootStep.fromInputLine(it) }
-                              .filter { it.cuboid.isWithin(limit) }
+                              .map { Cuboid.fromInputString(it) }
+                              .filter { it.isWithin(limit) }
             )
     }
 }
 
-data class RebootStep(val on: Boolean, val cuboid: Cuboid) {
+data class Cuboid(val on: Boolean, val x: IntRange, val y: IntRange, val z: IntRange) {
 
-    companion object {
-        fun fromInputLine(line: String) =
-            line.split(" ").let { (onOrOffStr, cuboidStr) ->
-                RebootStep(onOrOffStr == "on", Cuboid.fromInputString(cuboidStr))
-            }
-    }
-}
-
-data class Cuboid(val from: Coord, val to: Coord) {
-
-    fun forEach(action: ((Coord) -> Unit)) {
-        (from.x..to.x).forEach { x ->
-            (from.y..to.y).forEach { y ->
-                (from.z..to.z).forEach { z ->
-                    action(Coord(x, y, z))
-                }
-            }
+    infix fun intersect(other: Cuboid) =
+        if (!intersects(other)) {
+            null
+        } else {
+            Cuboid(!on, x intersect other.x, y intersect other.y, z intersect other.z)
         }
-    }
 
-    fun contains(coord: Coord) =
-        coord.x in from.x..to.x && coord.y in from.y..to.y && coord.z in from.z..to.z
+    private fun intersects(other: Cuboid) =
+        x intersects other.x && y intersects other.y && z intersects other.z
 
-    fun isWithin(limit: IntRange?) =
-        limit != null && limit.contains(from.x) && limit.contains(from.y) && limit.contains(from.z) &&
-                limit.contains(to.x) && limit.contains(to.y) && limit.contains(to.z)
+    fun isWithin(limit: IntRange?) = limit == null || (limit intersects x && limit intersects y && limit intersects z)
+
+    fun volume() = x.size() * y.size() * z.size() * if (on) 1 else -1
 
     companion object {
         fun fromInputString(input: String): Cuboid {
-            val startEndPairs = input
-                .split(",")
-                .map {
-                    it.split("=")[1].split("..").let { (start, end) -> start.toInt() to end.toInt() }
-                }
-            val upperLeft = Coord.fromList(startEndPairs.map { it.first })
-            val lowerRight = Coord.fromList(startEndPairs.map { it.second })
-            return Cuboid(upperLeft, lowerRight)
+            input.split(" ").let { (onOrOffStr, rangesStr) ->
+                val ranges = rangesStr
+                    .split(",")
+                    .map {
+                        it.split("=")[1].split("..").let { (start, end) -> start.toInt()..end.toInt() }
+                    }
+                return Cuboid(onOrOffStr == "on", ranges[0], ranges[1], ranges[2])
+            }
         }
     }
 }
+
+private infix fun IntRange.intersects(other: IntRange) = first <= other.last && last >= other.first
+
+private infix fun IntRange.intersect(other: IntRange) = maxOf(first, other.first)..minOf(last, other.last)
+
+private fun IntRange.size() = (last - first + 1).toLong()
 

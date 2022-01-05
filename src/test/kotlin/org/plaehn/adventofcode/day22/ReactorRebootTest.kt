@@ -2,7 +2,6 @@ package org.plaehn.adventofcode.day22
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.plaehn.adventofcode.common.readLines
 
@@ -38,7 +37,6 @@ internal class ReactorRebootTest {
     }
 
     @Test
-    @Disabled
     fun `Compute number of cubes that are on after reboot for test input for part2`() {
         val inputLines = this::class.java.readLines("test_input_part2.txt")
 
@@ -48,12 +46,11 @@ internal class ReactorRebootTest {
     }
 
     @Test
-    @Disabled
     fun `Compute number of cubes that are on after reboot for puzzle input for part2`() {
-        val inputLines = this::class.java.readLines("test_input_part2.txt")
+        val inputLines = this::class.java.readLines("puzzle_input.txt")
 
         val reactorReboot = ReactorReboot.fromInputLines(inputLines)
         val count = reactorReboot.computeNumberOfCubesThatAreOnAfterReboot()
-        assertThat(count).isEqualTo(0)
+        assertThat(count).isEqualTo(1359673068597669)
     }
 }
