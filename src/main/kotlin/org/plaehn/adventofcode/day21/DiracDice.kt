@@ -1,18 +1,20 @@
 package org.plaehn.adventofcode.day21
 
-class DiracDice(private val start1: Int, private val start2: Int) {
+class DiracDice(start1: Int, start2: Int) {
+
+    private val initialGameState = GameState(PlayerState(start1), PlayerState(start2))
 
     fun solvePart1(): Int {
-        val dice = Dice()
-        var player1 = Player(position = start1)
-        var player2 = Player(position = start2)
-        do {
-            player1 = player1.advance(dice.take(3).sum())
-            if (player1.wins()) return player2.score * dice.numberOfRolls
+        var gameState = initialGameState
+        val die = DeterministicDie()
+        while (!gameState.isWinner()) {
+            gameState = gameState.next(die.roll())
+        }
+        return gameState.minScore() * die.numberOfRolls
+    }
 
-            player2 = player2.advance(dice.take(3).sum())
-            if (player2.wins()) return player1.score * dice.numberOfRolls
-        } while (true)
+    fun solvePart2(): Long {
+        TODO()
     }
 
     companion object {
@@ -21,27 +23,39 @@ class DiracDice(private val start1: Int, private val start2: Int) {
     }
 }
 
-data class Player(val position: Int = 0, val score: Int = 0) {
+data class GameState(
+    val player1: PlayerState,
+    val player2: PlayerState,
+    val player1Turn: Boolean = true
+) {
 
-    fun advance(sum: Int): Player {
-        val newPosition = (position + sum - 1) % 10 + 1
-        val newScore = score + newPosition
-        return Player(newPosition, newScore)
-    }
+    fun next(die: Int) =
+        GameState(
+            if (player1Turn) player1.advance(die) else player1,
+            if (!player1Turn) player2.advance(die) else player2,
+            player1Turn = !player1Turn
+        )
 
-    fun wins() = score >= 1000
+    fun isWinner(scoreNeeded: Int = 1000) =
+        player1.score >= scoreNeeded || player2.score >= scoreNeeded
+
+    fun minScore(): Int = minOf(player1.score, player2.score)
 }
 
-data class Dice(private var next: Int = 1, var numberOfRolls: Int = 0) {
+data class PlayerState(val position: Int = 0, val score: Int = 0) {
 
-    fun take(number: Int): List<Int> {
-        numberOfRolls += number
-        return (1..number).map { next() }.toList()
+    fun advance(steps: Int): PlayerState {
+        val newPosition = (position + steps - 1) % 10 + 1
+        val newScore = score + newPosition
+        return PlayerState(newPosition, newScore)
     }
+}
 
-    fun next(): Int {
-        val ret = next
-        next = next % 100 + 1
-        return ret
+data class DeterministicDie(private var value: Int = 0, var numberOfRolls: Int = 0) {
+
+    fun roll(): Int {
+        numberOfRolls += 3
+        value += 3
+        return 3 * value - 3
     }
 }
